@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useData } from '@/lib/context/data-context';
-import { Award, BookOpen, Star, Linkedin, Mail, ArrowRight } from 'lucide-react';
+import { Award, BookOpen, Star, Mail, ArrowRight } from 'lucide-react';
 
 export default function InstructorsPage() {
   const { users } = useData();

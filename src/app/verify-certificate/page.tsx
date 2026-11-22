@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -21,7 +21,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-export default function VerifyCertificatePage() {
+function VerifyCertificateContent() {
   const searchParams = useSearchParams();
   const initialId = searchParams.get('id') || '';
   const { verifyCertificate, certificates } = useData();
@@ -231,5 +231,17 @@ export default function VerifyCertificatePage() {
 
       </div>
     </div>
+  );
+}
+
+export default function VerifyCertificatePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[60vh] flex items-center justify-center text-cyan-400 font-bold">
+        Loading Certificate Verification Engine...
+      </div>
+    }>
+      <VerifyCertificateContent />
+    </Suspense>
   );
 }
