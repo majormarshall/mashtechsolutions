@@ -138,12 +138,25 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🎭 Instant Demo Persona Switcher
+## 🔐 Authentication & Access Control
 
-You can test all 3 portals instantly without manual database setup. Click the **"Role: [Student | Instructor | Admin]"** pill in the top navigation bar or use the 1-click login buttons on `/auth/login`:
-- **Student**: Alex Marshall (`student@mashtech.ng`) → access `/student/dashboard`
-- **Instructor**: Dr. David Okon (`instructor@mashtech.ng`) → access `/instructor/dashboard`
-- **Admin**: Engr. Marshall (`admin@mashtech.ng`) → access `/admin/dashboard`
+Authentication is strictly enforced across all dashboard environments:
+
+### 👑 1. Administrator Dashboard (`/admin/*`)
+- **Admin Email**: `mashtechsolutions4@gmail.com`
+- **Admin Password**: `Alpha112`
+- Full access to Executive Director control center, financial Paystack ledger, user access management, and certificate issuance.
+- A quick **Auto-fill Admin** helper button is available on the `/auth/login` page for fast sign-in.
+
+### 🎓 2. Student & Faculty Registration (`/auth/register`)
+- All students and instructors register at `/auth/register` with their Full Name, Email, Phone Number, Role, and Password.
+- Upon registration, credentials are authenticated and the user is immediately routed to their portal (`/student/dashboard` or `/instructor/dashboard`).
+
+### 🧪 Automated Route & Dashboard Testing
+Run the automated test suite anytime to verify all 28 LMS and dashboard endpoints:
+```bash
+npm run test:routes
+```
 
 ---
 

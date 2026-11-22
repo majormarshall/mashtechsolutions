@@ -124,7 +124,7 @@ export default function StudentDashboardPage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-blue-800">
-                      <Image src={course.thumbnail_url} alt={course.title} fill className="object-cover" />
+                      <Image src={course.thumbnail_url} alt={course.title} fill sizes="64px" className="object-cover" />
                     </div>
                     <div>
                       <span className="text-[10px] font-bold uppercase text-cyan-400 tracking-wider">

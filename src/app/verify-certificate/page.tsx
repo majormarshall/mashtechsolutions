@@ -137,7 +137,7 @@ export default function VerifyCertificatePage() {
                   {/* Header */}
                   <div className="space-y-3 relative z-10">
                     <div className="relative w-20 h-20 mx-auto rounded-2xl overflow-hidden shadow-xl border border-cyan-400/50">
-                      <Image src="/logos/mashtech-logo.jpg" alt="MashTech Solutions Logo" fill className="object-cover" />
+                      <Image src="/logos/mashtech-logo.jpg" alt="MashTech Solutions Logo" fill sizes="80px" className="object-cover" />
                     </div>
                     <div>
                       <h2 className="text-2xl sm:text-3xl font-black text-white tracking-wider uppercase">

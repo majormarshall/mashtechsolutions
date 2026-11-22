@@ -56,7 +56,7 @@ export default function RegisterPage() {
           {/* Logo & Header */}
           <div className="text-center space-y-2">
             <div className="relative w-14 h-14 mx-auto rounded-2xl overflow-hidden border border-cyan-400/40 shadow-lg">
-              <Image src="/logos/mashtech-logo.jpg" alt="MashTech" fill className="object-cover" />
+              <Image src="/logos/mashtech-logo.jpg" alt="MashTech" fill sizes="56px" className="object-cover" />
             </div>
             <h1 className="text-2xl font-black text-white">Create Your Account</h1>
             <p className="text-xs text-slate-400">

@@ -68,6 +68,7 @@ export default function Navbar() {
                 src="/logos/mashtech-logo.jpg" 
                 alt="MashTech Solutions Logo" 
                 fill 
+                sizes="48px"
                 className="object-cover group-hover:scale-105 transition-transform duration-300" 
               />
             </div>

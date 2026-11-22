@@ -128,6 +128,7 @@ export default function HomePage() {
                     src="/images/mashtech-flyer.jpg"
                     alt="MashTech Solutions Flyer"
                     fill
+                    sizes="(max-width: 768px) 100vw, 448px"
                     className="object-cover group-hover:scale-102 transition-transform duration-500"
                     priority
                   />
@@ -286,6 +287,7 @@ export default function HomePage() {
                     src={course.thumbnail_url}
                     alt={course.title}
                     fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute top-3 left-3">

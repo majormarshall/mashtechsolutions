@@ -57,7 +57,7 @@ export default function MyCoursesPage() {
               >
                 <div>
                   <div className="relative h-44 w-full bg-slate-900">
-                    <Image src={course.thumbnail_url} alt={course.title} fill className="object-cover" />
+                    <Image src={course.thumbnail_url} alt={course.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" />
                     <div className="absolute top-3 left-3">
                       <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-slate-950/80 text-cyan-400 border border-cyan-500/30">
                         {course.category}

@@ -19,6 +19,7 @@ export default function Footer() {
                   src="/logos/mashtech-logo.jpg" 
                   alt="MashTech Solutions Logo" 
                   fill 
+                  sizes="48px"
                   className="object-cover" 
                 />
               </div>
