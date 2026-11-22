@@ -6,11 +6,11 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useData } from '@/lib/context/data-context';
 import { UserRole } from '@/types';
-import { User, Mail, Lock, Phone, ArrowRight, Sparkles } from 'lucide-react';
+import { User, Mail, Lock, Phone, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { switchRole } = useData();
+  const { registerUser } = useData();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -19,15 +19,32 @@ export default function RegisterPage() {
     role: 'student' as UserRole
   });
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      switchRole(formData.role);
-      router.push('/student/dashboard');
-    }, 800);
+
+    const result = await registerUser({
+      full_name: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      password: formData.password,
+      role: formData.role
+    });
+
+    setLoading(false);
+
+    if (result.success) {
+      if (formData.role === 'instructor') {
+        router.push('/instructor/dashboard');
+      } else {
+        router.push('/student/dashboard');
+      }
+    } else {
+      setErrorMsg(result.error || 'Failed to register. Please verify your details.');
+    }
   };
 
   return (
@@ -41,11 +58,18 @@ export default function RegisterPage() {
             <div className="relative w-14 h-14 mx-auto rounded-2xl overflow-hidden border border-cyan-400/40 shadow-lg">
               <Image src="/logos/mashtech-logo.jpg" alt="MashTech" fill className="object-cover" />
             </div>
-            <h1 className="text-2xl font-black text-white">Create Student Account</h1>
+            <h1 className="text-2xl font-black text-white">Create Your Account</h1>
             <p className="text-xs text-slate-400">
-              Start learning tech skills with MashTech Solutions today.
+              Register as a student or instructor to access classrooms and courses.
             </p>
           </div>
+
+          {errorMsg && (
+            <div className="p-3 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-300 text-xs flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -55,10 +79,10 @@ export default function RegisterPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Alex Marshall"
+                  placeholder="e.g. Emmanuel Adeleke"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-cyan-400"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
@@ -73,13 +97,41 @@ export default function RegisterPage() {
                   placeholder="name@gmail.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-cyan-400"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Phone Number / WhatsApp *</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Account Role</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, role: 'student' })}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold border transition-colors ${
+                    formData.role === 'student'
+                      ? 'bg-cyan-600 text-white border-cyan-400'
+                      : 'bg-slate-900 text-slate-300 border-slate-800'
+                  }`}
+                >
+                  🎓 Student
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, role: 'instructor' })}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold border transition-colors ${
+                    formData.role === 'instructor'
+                      ? 'bg-cyan-600 text-white border-cyan-400'
+                      : 'bg-slate-900 text-slate-300 border-slate-800'
+                  }`}
+                >
+                  👨‍🏫 Instructor
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Phone / WhatsApp *</label>
               <div className="relative">
                 <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
@@ -88,7 +140,7 @@ export default function RegisterPage() {
                   placeholder="08106071514"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-cyan-400"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
@@ -103,7 +155,7 @@ export default function RegisterPage() {
                   placeholder="Create a secure password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-cyan-400"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
@@ -111,9 +163,9 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl font-bold text-xs bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2"
             >
-              <span>{loading ? 'Creating Account...' : 'Register as Student'}</span>
+              <span>{loading ? 'Registering...' : `Register as ${formData.role === 'instructor' ? 'Instructor' : 'Student'}`}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>

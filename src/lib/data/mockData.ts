@@ -3,7 +3,7 @@ import { Course, Profile, Enrollment, LiveClass, Assignment, Submission, Certifi
 export const INITIAL_PROFILES: Profile[] = [
   {
     id: 'usr_admin',
-    email: 'admin@mashtech.ng',
+    email: 'mashtechsolutions4@gmail.com',
     full_name: 'Engr. Marshall (Director)',
     role: 'admin',
     avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',

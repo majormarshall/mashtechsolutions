@@ -8,6 +8,9 @@ import { BookOpen, Clock, Users, ArrowRight, Play, CheckCircle } from 'lucide-re
 
 export default function MyCoursesPage() {
   const { enrollments, currentUser } = useData();
+
+  if (!currentUser) return null;
+
   const userEnrollments = enrollments.filter(e => e.student_id === currentUser.id);
 
   return (

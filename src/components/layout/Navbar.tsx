@@ -3,29 +3,29 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useData } from '@/lib/context/data-context';
-import { UserRole } from '@/types';
 import { 
-  BookOpen, 
-  Shield, 
-  Award, 
-  User, 
   Bell, 
   Menu, 
   X, 
   ChevronDown, 
-  Sparkles,
-  ExternalLink,
-  GraduationCap
+  GraduationCap, 
+  LogOut, 
+  User, 
+  ShieldCheck, 
+  LogIn, 
+  UserPlus,
+  BookOpen
 } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { currentUser, switchRole, notifications, markNotificationAsRead } = useData();
+  const router = useRouter();
+  const { currentUser, isAuthenticated, logout, notifications, markNotificationAsRead } = useData();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   const unreadNotifs = notifications.filter(n => !n.is_read);
 
@@ -39,6 +39,7 @@ export default function Navbar() {
   ];
 
   const getDashboardPath = () => {
+    if (!currentUser) return '/auth/login';
     switch (currentUser.role) {
       case 'admin':
         return '/admin/dashboard';
@@ -47,6 +48,12 @@ export default function Navbar() {
       default:
         return '/student/dashboard';
     }
+  };
+
+  const handleSignOut = () => {
+    logout();
+    setShowUserDropdown(false);
+    router.push('/auth/login');
   };
 
   return (
@@ -94,94 +101,124 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* User & Role Switcher + Dashboard Button */}
+          {/* Authentication State & Action Buttons */}
           <div className="hidden sm:flex items-center gap-3">
             
-            {/* Quick Role Tester Pill */}
-            <div className="relative">
-              <button
-                onClick={() => setShowRoleMenu(!showRoleMenu)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-950 to-slate-900 border border-cyan-500/40 text-cyan-300 hover:border-cyan-400 transition-all shadow-sm"
-                title="Click to switch preview role (Student / Instructor / Admin)"
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Role: <strong className="capitalize text-white">{currentUser.role}</strong></span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-
-              {showRoleMenu && (
-                <div className="absolute right-0 mt-2 w-56 rounded-xl bg-[#091530] border border-blue-900 shadow-2xl py-2 z-50">
-                  <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
-                    Switch Test Persona
-                  </div>
-                  {(['student', 'instructor', 'admin'] as UserRole[]).map((r) => (
-                    <button
-                      key={r}
-                      onClick={() => {
-                        switchRole(r);
-                        setShowRoleMenu(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-blue-900/50 transition-colors ${
-                        currentUser.role === r ? 'text-cyan-400 font-bold bg-blue-950/60' : 'text-slate-200'
-                      }`}
-                    >
-                      <span className="capitalize">{r} Portal</span>
-                      {currentUser.role === r && <span className="text-[10px] bg-cyan-900/80 px-2 py-0.5 rounded text-cyan-300">Active</span>}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Notifications Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
-                aria-label="Notifications"
-              >
-                <Bell className="w-5 h-5" />
-                {unreadNotifs.length > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-[#030919]"></span>
-                )}
-              </button>
-
-              {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-[#091530] border border-blue-900/80 shadow-2xl p-3 z-50">
-                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-blue-950">
-                    <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Notifications</span>
-                    <span className="text-[11px] text-cyan-400">{unreadNotifs.length} new</span>
-                  </div>
-                  <div className="space-y-2 max-h-72 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <p className="text-xs text-slate-400 text-center py-4">No notifications yet</p>
-                    ) : (
-                      notifications.slice(0, 4).map((n) => (
-                        <div
-                          key={n.id}
-                          onClick={() => markNotificationAsRead(n.id)}
-                          className={`p-2.5 rounded-xl cursor-pointer transition-colors text-xs ${
-                            n.is_read ? 'bg-slate-900/40 text-slate-400' : 'bg-blue-950/60 text-slate-200 border-l-2 border-cyan-400'
-                          }`}
-                        >
-                          <div className="font-semibold text-white">{n.title}</div>
-                          <div className="text-[11px] text-slate-300 mt-0.5 line-clamp-2">{n.message}</div>
-                        </div>
-                      ))
+            {isAuthenticated && currentUser ? (
+              <>
+                {/* Notifications Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="relative p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
+                    aria-label="Notifications"
+                  >
+                    <Bell className="w-5 h-5" />
+                    {unreadNotifs.length > 0 && (
+                      <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-[#030919]"></span>
                     )}
-                  </div>
-                </div>
-              )}
-            </div>
+                  </button>
 
-            {/* Dashboard Button */}
-            <Link
-              href={getDashboardPath()}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-600 via-cyan-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:brightness-110 transition-all"
-            >
-              <GraduationCap className="w-4 h-4" />
-              <span>{currentUser.role === 'admin' ? 'Admin Portal' : currentUser.role === 'instructor' ? 'Instructor Hub' : 'My Classroom'}</span>
-            </Link>
+                  {showNotifications && (
+                    <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-[#091530] border border-blue-900/80 shadow-2xl p-3 z-50">
+                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-blue-950">
+                        <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Notifications</span>
+                        <span className="text-[11px] text-cyan-400">{unreadNotifs.length} new</span>
+                      </div>
+                      <div className="space-y-2 max-h-72 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <p className="text-xs text-slate-400 text-center py-4">No notifications yet</p>
+                        ) : (
+                          notifications.slice(0, 4).map((n) => (
+                            <div
+                              key={n.id}
+                              onClick={() => markNotificationAsRead(n.id)}
+                              className={`p-2.5 rounded-xl cursor-pointer transition-colors text-xs ${
+                                n.is_read ? 'bg-slate-900/40 text-slate-400' : 'bg-blue-950/60 text-slate-200 border-l-2 border-cyan-400'
+                              }`}
+                            >
+                              <div className="font-semibold text-white">{n.title}</div>
+                              <div className="text-[11px] text-slate-300 mt-0.5 line-clamp-2">{n.message}</div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Logged in User Menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserDropdown(!showUserDropdown)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#09183d] border border-blue-900/80 hover:border-cyan-500/50 transition-all text-xs"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 font-black flex items-center justify-center text-[11px]">
+                      {currentUser.full_name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="text-left">
+                      <div className="font-bold text-white leading-tight line-clamp-1">{currentUser.full_name}</div>
+                      <div className="text-[10px] text-cyan-400 capitalize">{currentUser.role}</div>
+                    </div>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
+                  </button>
+
+                  {showUserDropdown && (
+                    <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#071330] border border-blue-900/90 shadow-2xl p-2 z-50 space-y-1 text-xs">
+                      <div className="p-2 border-b border-blue-950 text-slate-400">
+                        <div className="text-[11px] font-bold text-white truncate">{currentUser.email}</div>
+                        <div className="text-[10px] text-cyan-400 uppercase font-semibold mt-0.5">Role: {currentUser.role}</div>
+                      </div>
+
+                      <Link
+                        href={getDashboardPath()}
+                        onClick={() => setShowUserDropdown(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-200 hover:text-white hover:bg-blue-950 transition-colors font-medium"
+                      >
+                        <GraduationCap className="w-4 h-4 text-cyan-400" />
+                        <span>Go to Dashboard</span>
+                      </Link>
+
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-950/40 transition-colors font-medium"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Dashboard Direct Button */}
+                <Link
+                  href={getDashboardPath()}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:brightness-110 transition-all"
+                >
+                  <span>Open {currentUser.role === 'admin' ? 'Admin Center' : currentUser.role === 'instructor' ? 'Instructor Hub' : 'Classroom'}</span>
+                </Link>
+              </>
+            ) : (
+              /* Public / Guest options: Sign in & Register */
+              <div className="flex items-center gap-2.5">
+                <Link
+                  href="/auth/login"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 transition-colors flex items-center gap-1.5"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Sign In</span>
+                </Link>
+
+                <Link
+                  href="/auth/register"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md hover:brightness-110 transition-all flex items-center gap-1.5"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Register</span>
+                </Link>
+              </div>
+            )}
+
           </div>
 
           {/* Mobile hamburger button */}
@@ -214,31 +251,43 @@ export default function Navbar() {
           </div>
 
           <div className="pt-3 border-t border-blue-950 flex flex-col gap-2">
-            <div className="text-xs text-slate-400 font-semibold">Switch Persona:</div>
-            <div className="grid grid-cols-3 gap-2">
-              {(['student', 'instructor', 'admin'] as UserRole[]).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => {
-                    switchRole(r);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`py-1.5 text-xs rounded-lg font-medium capitalize text-center ${
-                    currentUser.role === r ? 'bg-cyan-600 text-white font-bold' : 'bg-slate-900 text-slate-300'
-                  }`}
+            {isAuthenticated && currentUser ? (
+              <>
+                <div className="text-xs text-slate-300 font-semibold px-1">
+                  Signed in as <strong>{currentUser.full_name}</strong> ({currentUser.role})
+                </div>
+                <Link
+                  href={getDashboardPath()}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-center py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md"
                 >
-                  {r}
+                  Go to Dashboard
+                </Link>
+                <button
+                  onClick={() => { handleSignOut(); setMobileMenuOpen(false); }}
+                  className="text-center py-2 text-xs font-semibold text-rose-400 bg-rose-950/20 rounded-xl"
+                >
+                  Sign Out
                 </button>
-              ))}
-            </div>
-
-            <Link
-              href={getDashboardPath()}
-              onClick={() => setMobileMenuOpen(false)}
-              className="mt-2 text-center py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md"
-            >
-              Launch {currentUser.role.toUpperCase()} Portal
-            </Link>
+              </>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <Link
+                  href="/auth/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-2 text-xs font-bold text-center bg-slate-900 text-white rounded-xl border border-slate-700"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-2 text-xs font-bold text-center bg-cyan-600 text-white rounded-xl shadow-md"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}

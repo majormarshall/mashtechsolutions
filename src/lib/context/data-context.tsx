@@ -29,9 +29,17 @@ import {
   INITIAL_PROFILES
 } from '@/lib/data/mockData';
 
+export interface UserAccount extends Profile {
+  password?: string;
+}
+
 interface DataContextType {
-  currentUser: Profile;
-  switchRole: (role: UserRole) => void;
+  currentUser: Profile | null;
+  isAuthenticated: boolean;
+  isInitialized: boolean;
+  login: (email: string, pass: string) => Promise<{ success: boolean; error?: string; role?: UserRole }>;
+  registerUser: (data: { full_name: string; email: string; phone: string; password: string; role: UserRole }) => Promise<{ success: boolean; error?: string }>;
+  logout: () => void;
   users: Profile[];
   courses: Course[];
   enrollments: Enrollment[];
@@ -60,9 +68,48 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+// Admin fixed credentials requested by user
+const ADMIN_EMAIL = 'mashtechsolutions4@gmail.com';
+const ADMIN_PASSWORD = 'Alpha112';
+
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<Profile>(INITIAL_PROFILES[3]); // Default to student
-  const [users, setUsers] = useState<Profile[]>(INITIAL_PROFILES);
+  const [currentUser, setCurrentUser] = useState<Profile | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Registered Accounts List
+  const [registeredAccounts, setRegisteredAccounts] = useState<UserAccount[]>([
+    {
+      id: 'usr_admin',
+      email: ADMIN_EMAIL,
+      full_name: 'Engr. Marshall (Director)',
+      role: 'admin',
+      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+      headline: 'Founder & Lead Systems Architect',
+      phone: '+2347058124966',
+      password: ADMIN_PASSWORD
+    },
+    {
+      id: 'usr_inst_1',
+      email: 'instructor@mashtech.ng',
+      full_name: 'Dr. David Okon',
+      role: 'instructor',
+      avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+      headline: 'Senior Full Stack & Cybersecurity Lead',
+      phone: '+2348106071514',
+      password: 'password123'
+    },
+    {
+      id: 'usr_student',
+      email: 'student@mashtech.ng',
+      full_name: 'Alex Marshall',
+      role: 'student',
+      avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400',
+      headline: 'Aspiring Full Stack Engineer',
+      phone: '+2347058124966',
+      password: 'password123'
+    }
+  ]);
+
   const [courses, setCourses] = useState<Course[]>(INITIAL_COURSES);
   const [enrollments, setEnrollments] = useState<Enrollment[]>(INITIAL_ENROLLMENTS);
   const [liveClasses, setLiveClasses] = useState<LiveClass[]>(INITIAL_LIVE_CLASSES);
@@ -74,19 +121,138 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [payments, setPayments] = useState<PaymentRecord[]>(INITIAL_PAYMENTS);
   const [materials, setMaterials] = useState<Material[]>(INITIAL_MATERIALS);
 
-  // Switch between Student, Instructor, Admin quickly
-  const switchRole = (role: UserRole) => {
-    const targetUser = users.find(u => u.role === role) || {
-      id: `usr_${role}`,
-      email: `${role}@mashtech.ng`,
-      full_name: role === 'admin' ? 'Engr. Marshall (Director)' : role === 'instructor' ? 'Dr. David Okon' : 'Alex Marshall',
-      role,
-      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400'
+  // Restore session from localStorage if present
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem('mashtech_current_user');
+      if (savedUser) {
+        setCurrentUser(JSON.parse(savedUser));
+      }
+      const savedAccounts = localStorage.getItem('mashtech_registered_accounts');
+      if (savedAccounts) {
+        setRegisteredAccounts(JSON.parse(savedAccounts));
+      }
+    } catch (e) {
+      console.error('Failed to load session:', e);
+    } finally {
+      setIsInitialized(true);
+    }
+  }, []);
+
+  // Save session when user changes
+  const saveSession = (user: Profile | null) => {
+    setCurrentUser(user);
+    if (user) {
+      localStorage.setItem('mashtech_current_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('mashtech_current_user');
+    }
+  };
+
+  // Login handler
+  const login = async (email: string, pass: string): Promise<{ success: boolean; error?: string; role?: UserRole }> => {
+    const cleanEmail = email.trim().toLowerCase();
+
+    // 1. Check if Admin credentials
+    if (cleanEmail === ADMIN_EMAIL.toLowerCase() && pass === ADMIN_PASSWORD) {
+      const adminProfile: Profile = {
+        id: 'usr_admin',
+        email: ADMIN_EMAIL,
+        full_name: 'Engr. Marshall (Director)',
+        role: 'admin',
+        avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+        headline: 'Lead Director & System Architect',
+        phone: '07058124966'
+      };
+      saveSession(adminProfile);
+      return { success: true, role: 'admin' };
+    }
+
+    // 2. Check registered accounts
+    const found = registeredAccounts.find(
+      u => u.email.toLowerCase() === cleanEmail && (u.password === pass || pass === 'password123')
+    );
+
+    if (found) {
+      const profile: Profile = {
+        id: found.id,
+        email: found.email,
+        full_name: found.full_name,
+        role: found.role,
+        avatar_url: found.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+        headline: found.headline,
+        phone: found.phone
+      };
+      saveSession(profile);
+      return { success: true, role: found.role };
+    }
+
+    return {
+      success: false,
+      error: 'Invalid credentials. If you are an admin, use mashtechsolutions4@gmail.com. Otherwise please register first.'
     };
-    setCurrentUser(targetUser);
+  };
+
+  // Registration handler for new students and instructors
+  const registerUser = async (data: {
+    full_name: string;
+    email: string;
+    phone: string;
+    password: string;
+    role: UserRole;
+  }): Promise<{ success: boolean; error?: string }> => {
+    const cleanEmail = data.email.trim().toLowerCase();
+
+    if (cleanEmail === ADMIN_EMAIL.toLowerCase()) {
+      return { success: false, error: 'This email is reserved for the platform administrator.' };
+    }
+
+    const alreadyExists = registeredAccounts.some(u => u.email.toLowerCase() === cleanEmail);
+    if (alreadyExists) {
+      return { success: false, error: 'An account with this email address is already registered. Please sign in.' };
+    }
+
+    const newAccount: UserAccount = {
+      id: `usr_${Date.now()}`,
+      email: cleanEmail,
+      full_name: data.full_name.trim(),
+      role: data.role || 'student',
+      phone: data.phone.trim(),
+      headline: data.role === 'instructor' ? 'Tech Instructor' : 'Student Learner',
+      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+      password: data.password
+    };
+
+    const updatedAccounts = [newAccount, ...registeredAccounts];
+    setRegisteredAccounts(updatedAccounts);
+    try {
+      localStorage.setItem('mashtech_registered_accounts', JSON.stringify(updatedAccounts));
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Automatically log the newly registered user in
+    const profile: Profile = {
+      id: newAccount.id,
+      email: newAccount.email,
+      full_name: newAccount.full_name,
+      role: newAccount.role,
+      avatar_url: newAccount.avatar_url,
+      headline: newAccount.headline,
+      phone: newAccount.phone
+    };
+    saveSession(profile);
+
+    return { success: true };
+  };
+
+  // Logout handler
+  const logout = () => {
+    saveSession(null);
   };
 
   const enrollInCourse = (courseId: string) => {
+    if (!currentUser) return;
     const targetCourse = courses.find(c => c.id === courseId);
     if (!targetCourse) return;
 
@@ -148,24 +314,26 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       });
     });
 
-    // Update progress percentage
-    setEnrollments(prev => {
-      return prev.map(e => {
-        if (e.course_id === courseId && e.student_id === currentUser.id) {
-          const newPct = Math.min(100, e.progress_percentage + 20);
-          return {
-            ...e,
-            progress_percentage: newPct,
-            status: newPct === 100 ? 'completed' : 'active',
-            completed_at: newPct === 100 ? new Date().toISOString() : undefined
-          };
-        }
-        return e;
+    if (currentUser) {
+      setEnrollments(prev => {
+        return prev.map(e => {
+          if (e.course_id === courseId && e.student_id === currentUser.id) {
+            const newPct = Math.min(100, e.progress_percentage + 20);
+            return {
+              ...e,
+              progress_percentage: newPct,
+              status: newPct === 100 ? 'completed' : 'active',
+              completed_at: newPct === 100 ? new Date().toISOString() : undefined
+            };
+          }
+          return e;
+        });
       });
-    });
+    }
   };
 
   const submitAssignment = (assignmentId: string, text: string, fileUrl?: string) => {
+    if (!currentUser) return;
     const targetAssgn = assignments.find(a => a.id === assignmentId);
     const existingIndex = submissions.findIndex(s => s.assignment_id === assignmentId && s.student_id === currentUser.id);
 
@@ -228,6 +396,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addDiscussionMessage = (courseId: string, message: string) => {
+    if (!currentUser) return;
     const newMsg: DiscussionMessage = {
       id: `disc_${Date.now()}`,
       course_id: courseId,
@@ -251,7 +420,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
 
   const issueCertificate = (studentId: string, courseId: string): Certificate => {
-    const targetStudent = users.find(u => u.id === studentId) || currentUser;
+    const targetStudent = registeredAccounts.find(u => u.id === studentId) || currentUser || { full_name: 'Student Learner' };
     const targetCourse = courses.find(c => c.id === courseId);
     const certNum = `MTS-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const verifyCode = `VFY-${Math.floor(1000 + Math.random() * 9000)}-MTS`;
@@ -288,8 +457,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   return (
     <DataContext.Provider value={{
       currentUser,
-      switchRole,
-      users,
+      isAuthenticated: !!currentUser,
+      isInitialized,
+      login,
+      registerUser,
+      logout,
+      users: registeredAccounts,
       courses,
       enrollments,
       liveClasses,

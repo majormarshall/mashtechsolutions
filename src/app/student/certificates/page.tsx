@@ -7,6 +7,9 @@ import { Award, ShieldCheck, Printer, ExternalLink, Calendar, CheckCircle } from
 
 export default function StudentCertificatesPage() {
   const { certificates, currentUser } = useData();
+
+  if (!currentUser) return null;
+
   const userCerts = certificates.filter(c => c.student_id === currentUser.id);
 
   return (

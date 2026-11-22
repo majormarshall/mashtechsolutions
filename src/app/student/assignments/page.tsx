@@ -12,6 +12,8 @@ export default function StudentAssignmentsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  if (!currentUser) return null;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedAssgnId) return;

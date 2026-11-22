@@ -8,6 +8,10 @@ import { BookOpen, Users, Video, FileCheck, ArrowRight, Sparkles, Clock, Calenda
 export default function InstructorDashboardPage() {
   const { courses, enrollments, liveClasses, assignments, submissions, currentUser } = useData();
 
+  if (!currentUser) {
+    return null;
+  }
+
   const assignedCourses = courses.filter(c => c.instructor_id === currentUser.id || currentUser.role === 'admin');
   const pendingSubmissions = submissions.filter(s => s.status === 'submitted');
 

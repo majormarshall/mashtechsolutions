@@ -6,10 +6,12 @@ import { User, Mail, Phone, Shield, CheckCircle } from 'lucide-react';
 
 export default function StudentSettingsPage() {
   const { currentUser } = useData();
-  const [fullName, setFullName] = useState(currentUser.full_name);
-  const [phone, setPhone] = useState(currentUser.phone || '07058124966');
-  const [headline, setHeadline] = useState(currentUser.headline || 'Aspiring Tech Professional');
+  const [fullName, setFullName] = useState(currentUser?.full_name || '');
+  const [phone, setPhone] = useState(currentUser?.phone || '07058124966');
+  const [headline, setHeadline] = useState(currentUser?.headline || 'Aspiring Tech Professional');
   const [saved, setSaved] = useState(false);
+
+  if (!currentUser) return null;
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();

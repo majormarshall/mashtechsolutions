@@ -21,8 +21,8 @@ export default function InstructorLiveClassesPage() {
     scheduleLiveClass({
       course_id: courseId,
       course_title: course?.title || 'MashTech Course',
-      instructor_id: currentUser.id,
-      instructor_name: currentUser.full_name,
+      instructor_id: currentUser?.id || 'usr_inst',
+      instructor_name: currentUser?.full_name || 'MashTech Faculty',
       title,
       description,
       start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),

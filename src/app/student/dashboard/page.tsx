@@ -20,6 +20,10 @@ import {
 export default function StudentDashboardPage() {
   const { enrollments, liveClasses, assignments, submissions, certificates, currentUser } = useData();
 
+  if (!currentUser) {
+    return null;
+  }
+
   const userEnrollments = enrollments.filter(e => e.student_id === currentUser.id);
   const userSubmissions = submissions.filter(s => s.student_id === currentUser.id);
   const userCertificates = certificates.filter(c => c.student_id === currentUser.id);

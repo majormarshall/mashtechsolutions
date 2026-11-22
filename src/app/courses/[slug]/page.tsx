@@ -33,9 +33,9 @@ export default function CourseDetailsPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const course = courses.find((c) => c.slug === slug) || courses[0];
-  const isAlreadyEnrolled = enrollments.some(
-    (e) => e.student_id === currentUser.id && e.course_id === course.id
-  );
+  const isAlreadyEnrolled = currentUser 
+    ? enrollments.some((e) => e.student_id === currentUser.id && e.course_id === course.id)
+    : false;
 
   const handlePaystackPayment = () => {
     setIsProcessing(true);
@@ -237,11 +237,17 @@ export default function CourseDetailsPage() {
                 </Link>
               ) : (
                 <button
-                  onClick={() => setShowCheckoutModal(true)}
+                  onClick={() => {
+                    if (!currentUser) {
+                      router.push(`/auth/login?redirect=/courses/${course.slug}`);
+                    } else {
+                      setShowCheckoutModal(true);
+                    }
+                  }}
                   className="w-full py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 via-cyan-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/30 hover:brightness-110 transition-all flex items-center justify-center gap-2"
                 >
                   <CreditCard className="w-4 h-4" />
-                  <span>Enroll with Paystack</span>
+                  <span>{currentUser ? 'Enroll with Paystack' : 'Sign In to Enroll'}</span>
                 </button>
               )}
 
@@ -316,11 +322,11 @@ export default function CourseDetailsPage() {
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
                     <span>Student:</span>
-                    <span className="text-white font-semibold">{currentUser.full_name}</span>
+                    <span className="text-white font-semibold">{currentUser?.full_name || 'Student'}</span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
                     <span>Email:</span>
-                    <span className="text-white font-semibold">{currentUser.email}</span>
+                    <span className="text-white font-semibold">{currentUser?.email || ''}</span>
                   </div>
                   <div className="pt-2 border-t border-slate-800 flex justify-between items-baseline">
                     <span className="text-xs text-slate-300 font-bold">Total Tuition:</span>

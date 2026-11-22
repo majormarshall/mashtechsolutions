@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useData } from '@/lib/context/data-context';
 import { 
   LayoutDashboard, 
@@ -14,12 +14,17 @@ import {
   Settings, 
   ShieldAlert,
   ChevronRight,
-  Sparkles
+  LogOut,
+  ShieldCheck,
+  Lock,
+  ArrowRight,
+  Loader2
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { currentUser, switchRole } = useData();
+  const router = useRouter();
+  const { currentUser, isInitialized, logout } = useData();
 
   const menuItems = [
     { name: 'Admin Overview', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -32,6 +37,94 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'System Settings', href: '/admin/settings', icon: Settings },
   ];
 
+  // 1. Loading state while checking localStorage session
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-[#020716] flex flex-col items-center justify-center p-6 text-center">
+        <Loader2 className="w-10 h-10 text-cyan-400 animate-spin mb-4" />
+        <h3 className="text-white font-bold text-lg">Authenticating Session...</h3>
+        <p className="text-slate-400 text-sm mt-1">Verifying MashTech administrator privileges</p>
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated: Access Restricted Gate
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-[#020716] flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-[#050f26] border border-blue-900/80 rounded-3xl p-8 text-center shadow-2xl space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+            <Lock className="w-8 h-8" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-white">Administrator Access Required</h2>
+            <p className="text-slate-400 text-sm mt-2 leading-relaxed">
+              The MashTech Solutions Admin Console is restricted to authorized administrative personnel. 
+              Please sign in using the administrator email <span className="text-cyan-300 font-mono font-semibold">mashtechsolutions4@gmail.com</span>.
+            </p>
+          </div>
+          <div className="space-y-3 pt-2">
+            <Link
+              href={`/auth/login?redirect=${encodeURIComponent(pathname)}`}
+              className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-700 text-white hover:opacity-90 transition-all shadow-lg shadow-cyan-500/20"
+            >
+              <span>Sign In as Administrator</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/"
+              className="block w-full py-2.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+            >
+              Return to Public Website
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Authenticated but NOT admin: Role Forbidden Gate
+  if (currentUser.role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-[#020716] flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-[#050f26] border border-red-900/60 rounded-3xl p-8 text-center shadow-2xl space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto text-red-400">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-white">Admin Privileges Required</h2>
+            <p className="text-slate-400 text-sm mt-2 leading-relaxed">
+              You are signed in as <span className="text-white font-semibold">{currentUser.full_name}</span> (<span className="text-cyan-400 capitalize">{currentUser.role}</span>). 
+              This portal is strictly reserved for the Administrator.
+            </p>
+          </div>
+          <div className="space-y-3 pt-2">
+            <Link
+              href={currentUser.role === 'instructor' ? '/instructor/dashboard' : '/student/dashboard'}
+              className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-bold text-sm bg-blue-600 text-white hover:bg-blue-500 transition-all"
+            >
+              <span>Go to Your {currentUser.role === 'instructor' ? 'Instructor' : 'Student'} Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <button
+              onClick={() => {
+                logout();
+                router.push('/auth/login?redirect=/admin/dashboard');
+              }}
+              className="w-full py-2.5 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              Switch Account / Sign in as Admin
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const initials = currentUser.full_name
+    ? currentUser.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+    : 'AD';
+
   return (
     <div className="min-h-screen bg-[#020716] flex flex-col md:flex-row">
       
@@ -42,11 +135,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Admin Profile */}
           <div className="p-3.5 rounded-2xl bg-[#09183d] border border-blue-900/60 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-red-600 text-slate-950 font-black flex items-center justify-center shrink-0">
-              EM
+              {initials}
             </div>
             <div className="min-w-0 flex-1">
               <h4 className="text-xs font-bold text-white truncate">{currentUser.full_name}</h4>
-              <p className="text-[10px] text-amber-400 font-bold uppercase">Executive Director</p>
+              <p className="text-[10px] text-amber-400 font-bold uppercase flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3" />
+                Administrator
+              </p>
             </div>
           </div>
 
@@ -80,25 +176,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         </div>
 
-        {/* Portal switcher */}
+        {/* Sidebar Footer with Sign Out */}
         <div className="pt-6 border-t border-blue-950/80 space-y-2">
-          <div className="p-3 rounded-xl bg-[#030a1c] border border-blue-900/60 text-center space-y-1.5">
-            <div className="text-[10px] text-slate-400 font-semibold">Test Other Dashboards:</div>
-            <div className="flex gap-1.5">
-              <button
-                onClick={() => switchRole('student')}
-                className="flex-1 py-1 text-[10px] font-bold rounded-lg bg-blue-950 hover:bg-blue-900 text-cyan-300 border border-blue-800"
-              >
-                Student
-              </button>
-              <button
-                onClick={() => switchRole('instructor')}
-                className="flex-1 py-1 text-[10px] font-bold rounded-lg bg-blue-950 hover:bg-blue-900 text-cyan-300 border border-blue-800"
-              >
-                Instructor
-              </button>
-            </div>
+          <div className="px-3 py-2 text-[11px] text-slate-400 truncate">
+            {currentUser.email}
           </div>
+          <button
+            onClick={() => {
+              logout();
+              router.push('/auth/login');
+            }}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold text-red-400 bg-red-950/30 border border-red-900/50 hover:bg-red-900/40 transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out</span>
+          </button>
         </div>
 
       </aside>
