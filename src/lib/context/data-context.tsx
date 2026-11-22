@@ -61,6 +61,8 @@ interface DataContextType {
   createAssignment: (assignment: Omit<Assignment, 'id'>) => void;
   addDiscussionMessage: (courseId: string, message: string) => void;
   createCourse: (course: Omit<Course, 'id'>) => void;
+  updateCourse: (courseId: string, updates: Partial<Course>) => void;
+  deleteCourse: (courseId: string) => void;
   issueCertificate: (studentId: string, courseId: string) => Certificate;
   verifyCertificate: (certCodeOrNum: string) => Certificate | undefined;
   markNotificationAsRead: (notificationId: string) => void;
@@ -419,6 +421,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setCourses(prev => [newCourse, ...prev]);
   };
 
+  const updateCourse = (courseId: string, updates: Partial<Course>) => {
+    setCourses(prev => prev.map(c => c.id === courseId ? { ...c, ...updates, updated_at: new Date().toISOString() } : c));
+  };
+
+  const deleteCourse = (courseId: string) => {
+    setCourses(prev => prev.filter(c => c.id !== courseId));
+  };
+
   const issueCertificate = (studentId: string, courseId: string): Certificate => {
     const targetStudent = registeredAccounts.find(u => u.id === studentId) || currentUser || { full_name: 'Student Learner' };
     const targetCourse = courses.find(c => c.id === courseId);
@@ -481,6 +491,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       createAssignment,
       addDiscussionMessage,
       createCourse,
+      updateCourse,
+      deleteCourse,
       issueCertificate,
       verifyCertificate,
       markNotificationAsRead

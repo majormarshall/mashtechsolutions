@@ -41,12 +41,6 @@ function LoginForm() {
     }
   };
 
-  const autofillAdmin = () => {
-    setEmail('mashtechsolutions4@gmail.com');
-    setPassword('Alpha112');
-    setErrorMessage('');
-  };
-
   return (
     <div className="py-16 md:py-24 flex items-center justify-center">
       <div className="max-w-md w-full mx-auto px-4">
@@ -60,31 +54,7 @@ function LoginForm() {
             </div>
             <h1 className="text-2xl font-black text-white">Sign In to MashTech</h1>
             <p className="text-xs text-slate-400">
-              Authentication required for Student, Instructor, and Admin dashboards.
-            </p>
-          </div>
-
-          {/* Admin Credentials Helper Card */}
-          <div className="p-3.5 rounded-2xl bg-blue-950/60 border border-cyan-500/30 text-xs space-y-2">
-            <div className="flex items-center justify-between text-cyan-300 font-bold">
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-cyan-400" />
-                <span>Admin Credentials</span>
-              </span>
-              <button
-                type="button"
-                onClick={autofillAdmin}
-                className="text-[10px] text-cyan-400 hover:text-white underline font-semibold"
-              >
-                Auto-fill
-              </button>
-            </div>
-            <div className="text-[11px] text-slate-300 space-y-0.5 font-mono">
-              <div>Email: <strong>mashtechsolutions4@gmail.com</strong></div>
-              <div>Pass: <strong>Alpha112</strong></div>
-            </div>
-            <p className="text-[10px] text-slate-400">
-              Students & Instructors: Please register your own account below if not already registered.
+              Enter your registered email and password to access your dashboard.
             </p>
           </div>
 
