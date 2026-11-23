@@ -69,7 +69,7 @@ interface DataContextType {
   instructorApplications: InstructorApplication[];
   
   // Actions
-  enrollInCourse: (courseId: string) => void;
+  enrollInCourse: (courseId: string, paymentInfo?: { method?: string; reference?: string; bank?: string }) => void;
   completeLesson: (courseId: string, lessonId: string) => void;
   submitAssignment: (assignmentId: string, text: string, fileUrl?: string) => void;
   gradeSubmission: (submissionId: string, score: number, feedback: string) => void;
@@ -88,9 +88,16 @@ interface DataContextType {
   updateServiceRequestStatus: (requestId: string, status: ServiceRequest['status']) => void;
   createClientProject: (data: Omit<ClientProject, 'id'>) => ClientProject;
   updateProjectMilestone: (projectId: string, milestoneId: string, statusOrUpdates: ProjectMilestone['status'] | Partial<ProjectMilestone>) => void;
-  payInvoice: (invoiceId: string) => void;
+  payInvoice: (invoiceId: string, paymentInfo?: { method?: string; reference?: string; bank?: string }) => void;
   submitInstructorApplication: (data: Omit<InstructorApplication, 'id' | 'created_at' | 'status'>) => InstructorApplication;
   updateInstructorApplicationStatus: (appId: string, status: InstructorApplication['status']) => void;
+
+  // Enrollment & User Administration
+  addAdminUser: (data: { full_name: string; email: string; phone: string; password: string; headline?: string }) => { success: boolean; error?: string };
+  updateUserRole: (userId: string, newRole: UserRole) => void;
+  createEnrollment: (data: { student_id: string; course_id: string; status?: Enrollment['status']; progress_percentage?: number }) => Enrollment;
+  updateEnrollment: (enrollmentId: string, updates: Partial<Enrollment>) => void;
+  deleteEnrollment: (enrollmentId: string) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -165,7 +172,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [clientInvoices, setClientInvoices] = useState<ClientInvoice[]>(INITIAL_CLIENT_INVOICES);
   const [instructorApplications, setInstructorApplications] = useState<InstructorApplication[]>(INITIAL_INSTRUCTOR_APPLICATIONS);
 
-  // Restore session from localStorage if present
+  // Restore session & data from localStorage if present
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem('mashtech_current_user');
@@ -176,8 +183,36 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       if (savedAccounts) {
         setRegisteredAccounts(JSON.parse(savedAccounts));
       }
+      const savedCourses = localStorage.getItem('mashtech_courses');
+      if (savedCourses) {
+        setCourses(JSON.parse(savedCourses));
+      }
+      const savedEnrollments = localStorage.getItem('mashtech_enrollments');
+      if (savedEnrollments) {
+        setEnrollments(JSON.parse(savedEnrollments));
+      }
+      const savedServices = localStorage.getItem('mashtech_services');
+      if (savedServices) {
+        setServices(JSON.parse(savedServices));
+      }
+      const savedProjects = localStorage.getItem('mashtech_client_projects');
+      if (savedProjects) {
+        setClientProjects(JSON.parse(savedProjects));
+      }
+      const savedRequests = localStorage.getItem('mashtech_service_requests');
+      if (savedRequests) {
+        setServiceRequests(JSON.parse(savedRequests));
+      }
+      const savedInvoices = localStorage.getItem('mashtech_client_invoices');
+      if (savedInvoices) {
+        setClientInvoices(JSON.parse(savedInvoices));
+      }
+      const savedInstructorApps = localStorage.getItem('mashtech_instructor_apps');
+      if (savedInstructorApps) {
+        setInstructorApplications(JSON.parse(savedInstructorApps));
+      }
     } catch (e) {
-      console.error('Failed to load session:', e);
+      console.error('Failed to load session/data:', e);
     } finally {
       setIsInitialized(true);
     }
@@ -190,6 +225,36 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('mashtech_current_user', JSON.stringify(user));
     } else {
       localStorage.removeItem('mashtech_current_user');
+    }
+  };
+
+  // Helper to persist courses
+  const persistCourses = (updatedCourses: Course[]) => {
+    setCourses(updatedCourses);
+    try {
+      localStorage.setItem('mashtech_courses', JSON.stringify(updatedCourses));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Helper to persist enrollments
+  const persistEnrollments = (updatedEnrollments: Enrollment[]) => {
+    setEnrollments(updatedEnrollments);
+    try {
+      localStorage.setItem('mashtech_enrollments', JSON.stringify(updatedEnrollments));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Helper to persist accounts
+  const persistAccounts = (updatedAccounts: UserAccount[]) => {
+    setRegisteredAccounts(updatedAccounts);
+    try {
+      localStorage.setItem('mashtech_registered_accounts', JSON.stringify(updatedAccounts));
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -295,7 +360,53 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     saveSession(null);
   };
 
-  const enrollInCourse = (courseId: string) => {
+  // Add new Administrator
+  const addAdminUser = (data: {
+    full_name: string;
+    email: string;
+    phone: string;
+    password: string;
+    headline?: string;
+  }): { success: boolean; error?: string } => {
+    const cleanEmail = data.email.trim().toLowerCase();
+    if (!cleanEmail || !data.password) {
+      return { success: false, error: 'Email and password are required.' };
+    }
+    const alreadyExists = registeredAccounts.some(u => u.email.toLowerCase() === cleanEmail);
+    if (alreadyExists) {
+      return { success: false, error: 'An account with this email address is already registered.' };
+    }
+    const newAdmin: UserAccount = {
+      id: `usr_admin_${Date.now()}`,
+      email: cleanEmail,
+      full_name: data.full_name.trim(),
+      role: 'admin',
+      phone: data.phone.trim() || '+2347058124966',
+      headline: data.headline || 'System Administrator',
+      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+      password: data.password
+    };
+    const updated = [newAdmin, ...registeredAccounts];
+    persistAccounts(updated);
+    return { success: true };
+  };
+
+  // Update user privilege role
+  const updateUserRole = (userId: string, newRole: UserRole) => {
+    const updated = registeredAccounts.map(u => {
+      if (u.id === userId) {
+        return {
+          ...u,
+          role: newRole,
+          headline: newRole === 'admin' ? (u.headline || 'System Administrator') : u.headline
+        };
+      }
+      return u;
+    });
+    persistAccounts(updated);
+  };
+
+  const enrollInCourse = (courseId: string, paymentInfo?: { method?: string; reference?: string; bank?: string }) => {
     if (!currentUser) return;
     const targetCourse = courses.find(c => c.id === courseId);
     if (!targetCourse) return;
@@ -313,9 +424,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       enrolled_at: new Date().toISOString()
     };
 
-    setEnrollments(prev => [newEnrollment, ...prev]);
+    persistEnrollments([newEnrollment, ...enrollments]);
 
     // Record payment
+    const paymentMethod = paymentInfo?.method 
+      ? paymentInfo.method 
+      : paymentInfo?.bank 
+      ? `Direct Bank Transfer (${paymentInfo.bank})` 
+      : 'Paystack Automated Verification';
+
     const newPayment: PaymentRecord = {
       id: `pay_${Date.now()}`,
       student_id: currentUser.id,
@@ -324,9 +441,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       course_title: targetCourse.title,
       amount: targetCourse.price,
       currency: 'NGN',
-      reference: `MTS_PAY_${Math.floor(100000000 + Math.random() * 900000000)}`,
+      reference: paymentInfo?.reference || `MTS_PAY_${Math.floor(100000000 + Math.random() * 900000000)}`,
       status: 'success',
-      payment_method: 'Paystack Automated Verification',
+      payment_method: paymentMethod,
       paid_at: new Date().toISOString(),
       created_at: new Date().toISOString()
     };
@@ -460,15 +577,63 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       id: `course_${Date.now()}`,
       created_at: new Date().toISOString()
     };
-    setCourses(prev => [newCourse, ...prev]);
+    const updated = [newCourse, ...courses];
+    persistCourses(updated);
   };
 
   const updateCourse = (courseId: string, updates: Partial<Course>) => {
-    setCourses(prev => prev.map(c => c.id === courseId ? { ...c, ...updates, updated_at: new Date().toISOString() } : c));
+    const updated = courses.map(c => 
+      c.id === courseId ? { ...c, ...updates, updated_at: new Date().toISOString() } : c
+    );
+    persistCourses(updated);
   };
 
   const deleteCourse = (courseId: string) => {
-    setCourses(prev => prev.filter(c => c.id !== courseId));
+    const updated = courses.filter(c => c.id !== courseId);
+    persistCourses(updated);
+  };
+
+  // Enrollment Management Actions
+  const createEnrollment = (data: {
+    student_id: string;
+    course_id: string;
+    status?: Enrollment['status'];
+    progress_percentage?: number;
+  }): Enrollment => {
+    const targetCourse = courses.find(c => c.id === data.course_id);
+    const newEnr: Enrollment = {
+      id: `enr_${Date.now()}`,
+      student_id: data.student_id,
+      course_id: data.course_id,
+      course: targetCourse,
+      status: data.status || 'active',
+      progress_percentage: data.progress_percentage || 0,
+      enrolled_at: new Date().toISOString()
+    };
+    const updated = [newEnr, ...enrollments];
+    persistEnrollments(updated);
+    return newEnr;
+  };
+
+  const updateEnrollment = (enrollmentId: string, updates: Partial<Enrollment>) => {
+    const updated = enrollments.map(enr => {
+      if (enr.id !== enrollmentId) return enr;
+      let courseObj = enr.course;
+      if (updates.course_id && updates.course_id !== enr.course_id) {
+        courseObj = courses.find(c => c.id === updates.course_id);
+      }
+      return {
+        ...enr,
+        ...updates,
+        course: courseObj || enr.course
+      };
+    });
+    persistEnrollments(updated);
+  };
+
+  const deleteEnrollment = (enrollmentId: string) => {
+    const updated = enrollments.filter(e => e.id !== enrollmentId);
+    persistEnrollments(updated);
   };
 
   const issueCertificate = (studentId: string, courseId: string): Certificate => {
@@ -568,13 +733,21 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
-  const payInvoice = (invoiceId: string) => {
+  const payInvoice = (invoiceId: string, paymentInfo?: { method?: string; reference?: string; bank?: string }) => {
+    const paymentMethod = paymentInfo?.method 
+      ? paymentInfo.method 
+      : paymentInfo?.bank 
+      ? `Direct Bank Transfer (${paymentInfo.bank})` 
+      : 'Paystack Automated Verification';
+
+    const payRef = paymentInfo?.reference || `MTS_INV_PAY_${Math.floor(10000000 + Math.random() * 90000000)}`;
+
     setClientInvoices(prev => prev.map(inv => {
       if (inv.id !== invoiceId) return inv;
       return {
         ...inv,
         status: 'paid',
-        reference: `MTS_INV_PAY_${Math.floor(10000000 + Math.random() * 90000000)}`,
+        reference: payRef,
         paid_at: new Date().toISOString()
       };
     }));
@@ -663,7 +836,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       updateProjectMilestone,
       payInvoice,
       submitInstructorApplication,
-      updateInstructorApplicationStatus
+      updateInstructorApplicationStatus,
+      addAdminUser,
+      updateUserRole,
+      createEnrollment,
+      updateEnrollment,
+      deleteEnrollment
     }}>
       {children}
     </DataContext.Provider>

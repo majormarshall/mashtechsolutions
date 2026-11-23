@@ -71,7 +71,7 @@ export interface Enrollment {
   student_id: string;
   course_id: string;
   course?: Course;
-  status: 'active' | 'completed' | 'cancelled';
+  status: 'active' | 'completed' | 'cancelled' | 'dropped';
   progress_percentage: number;
   enrolled_at: string;
   completed_at?: string;

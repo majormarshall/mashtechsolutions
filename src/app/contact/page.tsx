@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Phone, Mail, MapPin, Send, MessageSquare, Clock, CheckCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Send, MessageSquare, Clock, CheckCircle, Building2, Copy, Check } from 'lucide-react';
+import { OFFICIAL_BANK_ACCOUNTS } from '@/lib/data/bankAccounts';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -12,6 +14,12 @@ export default function ContactPage() {
     courseInterest: 'Web Development',
     message: ''
   });
+
+  const handleCopy = (acc: string) => {
+    navigator.clipboard.writeText(acc);
+    setCopiedAccount(acc);
+    setTimeout(() => setCopiedAccount(null), 2500);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,6 +93,47 @@ export default function ContactPage() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Official Bank Accounts for Direct Transfer */}
+            <div className="p-6 rounded-3xl bg-[#071330] border border-cyan-500/30 space-y-4 shadow-xl">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-cyan-950 text-cyan-400 border border-cyan-500/40">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Direct Bank Transfer Accounts</h3>
+                  <p className="text-[11px] text-slate-400">
+                    Account Name: <strong className="text-white">MashTech Solutions / Adeleke Marshall</strong>
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2.5 text-xs">
+                {OFFICIAL_BANK_ACCOUNTS.map((acc) => {
+                  const isCopied = copiedAccount === acc.accountNumber;
+                  return (
+                    <div key={acc.tag} className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3">
+                      <div>
+                        <div className="font-bold text-white text-xs">{acc.bankName}</div>
+                        <div className="font-mono text-cyan-400 font-bold tracking-wider mt-0.5">{acc.accountNumber}</div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(acc.accountNumber)}
+                        className="px-3 py-1.5 rounded-xl bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/30 font-bold text-[11px] flex items-center gap-1.5 transition-all"
+                      >
+                        {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{isCopied ? 'Copied' : 'Copy'}</span>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-slate-400 text-center">
+                After transfer, send narration or confirmation to <strong className="text-cyan-400">07058124966</strong> on WhatsApp.
+              </p>
             </div>
           </div>
 

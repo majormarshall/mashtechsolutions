@@ -20,8 +20,12 @@ import {
   ArrowRight,
   BookOpen,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  Building2,
+  Copy,
+  Check
 } from 'lucide-react';
+import { OFFICIAL_BANK_ACCOUNTS } from '@/lib/data/bankAccounts';
 
 export default function CourseDetailsPage() {
   const params = useParams();
@@ -31,18 +35,52 @@ export default function CourseDetailsPage() {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'paystack'>('bank_transfer');
+  const [selectedBank, setSelectedBank] = useState<'OPay' | 'PalmPay' | 'UBA'>('OPay');
+  const [senderName, setSenderName] = useState(currentUser?.full_name || '');
+  const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
 
   const course = courses.find((c) => c.slug === slug) || courses[0];
   const isAlreadyEnrolled = currentUser 
     ? enrollments.some((e) => e.student_id === currentUser.id && e.course_id === course.id)
     : false;
 
+  const handleCopyAccount = (accNum: string) => {
+    navigator.clipboard.writeText(accNum);
+    setCopiedAccount(accNum);
+    setTimeout(() => setCopiedAccount(null), 2500);
+  };
+
+  const handleBankTransferPayment = () => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setPaymentSuccess(true);
+      enrollInCourse(course.id, {
+        method: `Direct Bank Transfer (${selectedBank})`,
+        bank: selectedBank,
+        reference: `MTS_TRF_${selectedBank.toUpperCase()}_${Math.floor(10000000 + Math.random() * 90000000)}`
+      });
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      setTimeout(() => {
+        router.push(`/student/classroom/${course.id}`);
+      }, 2500);
+    }, 1200);
+  };
+
   const handlePaystackPayment = () => {
     setIsProcessing(true);
     setTimeout(() => {
       setIsProcessing(false);
       setPaymentSuccess(true);
-      enrollInCourse(course.id);
+      enrollInCourse(course.id, {
+        method: 'Paystack Automated Gateway',
+        reference: `MTS_PAY_${Math.floor(100000000 + Math.random() * 900000000)}`
+      });
       confetti({
         particleCount: 100,
         spread: 70,
@@ -280,10 +318,10 @@ export default function CourseDetailsPage() {
 
       </div>
 
-      {/* Paystack Checkout Modal */}
+      {/* Checkout Modal (Direct Bank Transfer + Paystack) */}
       {showCheckoutModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-[#071330] border border-cyan-500/40 p-6 sm:p-8 shadow-2xl relative space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-3xl bg-[#071330] border border-cyan-500/40 p-6 sm:p-8 shadow-2xl relative space-y-6 max-h-[92vh] overflow-y-auto">
             
             <div className="flex items-center justify-between pb-4 border-b border-blue-950">
               <div className="flex items-center gap-2">
@@ -291,65 +329,208 @@ export default function CourseDetailsPage() {
                   ₦
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Paystack Checkout</h3>
-                  <p className="text-[11px] text-slate-400">Secure Tuition Payment</p>
+                  <h3 className="text-base font-bold text-white">Tuition Settlement</h3>
+                  <p className="text-[11px] text-slate-400">Choose Direct Bank Transfer or Paystack</p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowCheckoutModal(false)}
-                className="text-slate-400 hover:text-white text-sm"
+                className="text-slate-400 hover:text-white text-sm p-1"
               >
                 ✕
               </button>
             </div>
 
             {paymentSuccess ? (
-              <div className="text-center py-6 space-y-3">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center">
+              <div className="text-center py-8 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center animate-bounce">
                   <CheckCircle className="w-10 h-10" />
                 </div>
                 <h4 className="text-xl font-bold text-white">Payment Verified!</h4>
                 <p className="text-xs text-slate-300">
-                  Congratulations! You are officially enrolled in <strong>{course.title}</strong>. Redirecting to your classroom...
+                  Congratulations! You are officially enrolled in <strong>{course.title}</strong>. Redirecting to your virtual classroom...
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
+              <div className="space-y-5">
+                {/* Tuition Summary Box */}
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Course:</span>
+                    <span>Selected Track:</span>
                     <span className="text-white font-semibold">{course.title}</span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Student:</span>
+                    <span>Student Learner:</span>
                     <span className="text-white font-semibold">{currentUser?.full_name || 'Student'}</span>
                   </div>
-                  <div className="flex justify-between text-xs text-slate-400">
-                    <span>Email:</span>
-                    <span className="text-white font-semibold">{currentUser?.email || ''}</span>
-                  </div>
                   <div className="pt-2 border-t border-slate-800 flex justify-between items-baseline">
-                    <span className="text-xs text-slate-300 font-bold">Total Tuition:</span>
-                    <span className="text-xl font-black text-cyan-400">₦{course.price.toLocaleString()}</span>
+                    <span className="text-xs text-slate-300 font-bold">Total Tuition Fee:</span>
+                    <span className="text-2xl font-black text-cyan-400">₦{course.price.toLocaleString()}</span>
                   </div>
                 </div>
 
-                <div className="text-[11px] text-slate-400 flex items-center gap-2">
-                  <Lock className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>256-Bit SSL Encrypted by Paystack Payment Infrastructure</span>
+                {/* Payment Method Selector Tabs */}
+                <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-900/80 border border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('bank_transfer')}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      paymentMethod === 'bank_transfer'
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Building2 className="w-4 h-4" />
+                    <span>Bank Transfer</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('paystack')}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      paymentMethod === 'paystack'
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black shadow-md'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    <span>Paystack (Card/USSD)</span>
+                  </button>
                 </div>
 
-                <button
-                  disabled={isProcessing}
-                  onClick={handlePaystackPayment}
-                  className="w-full py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2"
-                >
-                  {isProcessing ? (
-                    <span>Verifying with Paystack Gateway...</span>
-                  ) : (
-                    <span>Complete ₦{course.price.toLocaleString()} Payment</span>
-                  )}
-                </button>
+                {paymentMethod === 'bank_transfer' ? (
+                  /* DIRECT BANK TRANSFER OPTION */
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <div className="text-xs font-bold text-white flex items-center justify-between">
+                        <span>Select Bank to Transfer:</span>
+                        <span className="text-[10px] text-cyan-400">Instant credit & admission</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400">
+                        Transfer <strong>₦{course.price.toLocaleString()}</strong> to any of our verified accounts:
+                      </p>
+                    </div>
+
+                    {/* Bank Selection Tabs */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['OPay', 'PalmPay', 'UBA'] as const).map((b) => (
+                        <button
+                          key={b}
+                          type="button"
+                          onClick={() => setSelectedBank(b)}
+                          className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center ${
+                            selectedBank === b
+                              ? b === 'OPay'
+                                ? 'bg-emerald-950 text-emerald-300 border-emerald-400'
+                                : b === 'PalmPay'
+                                ? 'bg-purple-950 text-purple-300 border-purple-400'
+                                : 'bg-red-950 text-rose-300 border-rose-400'
+                              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                          }`}
+                        >
+                          {b}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Selected Bank Details Card */}
+                    {(() => {
+                      const currentAcc = OFFICIAL_BANK_ACCOUNTS.find(a => a.tag === selectedBank) || OFFICIAL_BANK_ACCOUNTS[0];
+                      const isCopied = copiedAccount === currentAcc.accountNumber;
+
+                      return (
+                        <div className={`p-4 rounded-2xl border bg-gradient-to-br ${currentAcc.color} space-y-3 relative`}>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-white uppercase tracking-wider">{currentAcc.bankName}</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-950/80 text-cyan-300 border border-slate-700">
+                              {currentAcc.badge}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+                            <div>
+                              <div className="text-[10px] text-slate-400 uppercase font-semibold">Account Number</div>
+                              <div className="text-xl font-mono font-black text-white tracking-widest">
+                                {currentAcc.accountNumber}
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleCopyAccount(currentAcc.accountNumber)}
+                              className="px-3 py-1.5 rounded-lg bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 text-xs font-bold flex items-center gap-1.5 transition-all"
+                            >
+                              {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                              <span>{isCopied ? 'Copied!' : 'Copy'}</span>
+                            </button>
+                          </div>
+
+                          <div className="text-[11px] text-slate-300">
+                            <span className="text-slate-400">Account Name: </span>
+                            <strong className="text-white">{currentAcc.accountName}</strong>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Sender Details Form */}
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                          Transfer Sender Name / Reference
+                        </label>
+                        <input
+                          type="text"
+                          value={senderName}
+                          onChange={(e) => setSenderName(e.target.value)}
+                          placeholder="e.g. Emmanuel Adeleke (or transaction narration)"
+                          className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400"
+                        />
+                      </div>
+
+                      <button
+                        disabled={isProcessing}
+                        onClick={handleBankTransferPayment}
+                        className="w-full py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 hover:brightness-110 text-slate-950 shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2"
+                      >
+                        {isProcessing ? (
+                          <span>Confirming Bank Transfer...</span>
+                        ) : (
+                          <span>I Have Sent ₦{course.price.toLocaleString()} — Confirm & Enroll</span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* PAYSTACK OPTION */
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 text-xs text-emerald-200/90 leading-relaxed">
+                      Instant card, USSD (*737#, *966#), Apple Pay, or QR settlement processed directly via Paystack PCI-DSS certified gateway.
+                    </div>
+
+                    <div className="text-[11px] text-slate-400 flex items-center gap-2">
+                      <Lock className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>256-Bit SSL Encrypted Paystack Infrastructure</span>
+                    </div>
+
+                    <button
+                      disabled={isProcessing}
+                      onClick={handlePaystackPayment}
+                      className="w-full py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2"
+                    >
+                      {isProcessing ? (
+                        <span>Connecting with Paystack...</span>
+                      ) : (
+                        <span>Pay ₦{course.price.toLocaleString()} with Paystack</span>
+                      )}
+                    </button>
+                  </div>
+                )}
+
+                <div className="pt-2 border-t border-slate-800/80 text-center">
+                  <span className="text-[11px] text-slate-400">
+                    Questions or payment assistance? Call <strong className="text-cyan-400">07058124966</strong> / <strong className="text-cyan-400">08106071514</strong>
+                  </span>
+                </div>
               </div>
             )}
 
