@@ -71,7 +71,7 @@ export default function AdminCoursesPage() {
     setEditLevel(course.level);
     setEditStatus(course.status);
     setEditDescription(course.description);
-    setEditInstructorId(course.instructor_id || instructors[0]?.id || 'usr_inst_1');
+    setEditInstructorId(course.instructor_id || instructors[0]?.id || 'usr_admin');
     setEditThumbnailUrl(course.thumbnail_url || 'https://images.unsplash.com/photo-1547658719-da2b51169166?w=800');
     setSaveSuccess(false);
   };
@@ -237,8 +237,9 @@ export default function AdminCoursesPage() {
               {/* Price & Actions */}
               <div className="pt-3 border-t border-blue-950/80 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-slate-400 block uppercase tracking-wider font-semibold">Tuition Fee</span>
+                  <span className="text-[10px] text-slate-400 block uppercase tracking-wider font-semibold">Standard Tuition</span>
                   <span className="text-lg font-black text-cyan-400">₦{course.price.toLocaleString()}</span>
+                  <span className="text-[10px] text-amber-400 block font-semibold">Scholarship Track: ₦40,000</span>
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -385,7 +386,7 @@ export default function AdminCoursesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Tuition Fee (NGN ₦) *</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Standard Tuition (NGN ₦) *</label>
                   <input
                     type="number"
                     required
@@ -395,6 +396,9 @@ export default function AdminCoursesPage() {
                     onChange={(e) => setEditPrice(Number(e.target.value))}
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-cyan-500/50 text-xs font-bold text-cyan-300 focus:outline-none focus:border-cyan-400"
                   />
+                  <span className="text-[10px] text-amber-400 block mt-1">
+                    🎓 Scholarship Track fee: ₦40,000 (Application & Screening Form)
+                  </span>
                 </div>
               </div>
 
@@ -589,7 +593,7 @@ export default function AdminCoursesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Tuition Fee (NGN ₦) *</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Standard Tuition (NGN ₦) *</label>
                   <input
                     type="number"
                     required
@@ -599,6 +603,9 @@ export default function AdminCoursesPage() {
                     onChange={(e) => setCreatePrice(Number(e.target.value))}
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400"
                   />
+                  <span className="text-[10px] text-amber-400 block mt-1">
+                    🎓 Scholarship Track fee: ₦40,000 (Application & Screening Form)
+                  </span>
                 </div>
               </div>
 

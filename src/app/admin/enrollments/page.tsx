@@ -39,6 +39,8 @@ export default function AdminEnrollmentsPage() {
   const [newCourseId, setNewCourseId] = useState('');
   const [newStatus, setNewStatus] = useState<Enrollment['status']>('active');
   const [newProgress, setNewProgress] = useState(0);
+  const [newEnrollmentType, setNewEnrollmentType] = useState<'regular' | 'scholarship'>('regular');
+  const [newScholarshipFeePaid, setNewScholarshipFeePaid] = useState(true);
 
   // Edit Modal
   const [editingEnr, setEditingEnr] = useState<Enrollment | null>(null);
@@ -46,6 +48,8 @@ export default function AdminEnrollmentsPage() {
   const [editStudentId, setEditStudentId] = useState('');
   const [editStatus, setEditStatus] = useState<Enrollment['status']>('active');
   const [editProgress, setEditProgress] = useState(0);
+  const [editEnrollmentType, setEditEnrollmentType] = useState<'regular' | 'scholarship'>('regular');
+  const [editScholarshipFeePaid, setEditScholarshipFeePaid] = useState(true);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Open Edit Modal
@@ -55,6 +59,8 @@ export default function AdminEnrollmentsPage() {
     setEditStudentId(enr.student_id);
     setEditStatus(enr.status);
     setEditProgress(enr.progress_percentage);
+    setEditEnrollmentType(enr.enrollment_type || 'regular');
+    setEditScholarshipFeePaid(enr.scholarship_fee_paid ?? true);
     setSaveSuccess(false);
   };
 
@@ -68,6 +74,9 @@ export default function AdminEnrollmentsPage() {
       student_id: editStudentId,
       status: editStatus,
       progress_percentage: Number(editProgress),
+      enrollment_type: editEnrollmentType,
+      scholarship_fee_paid: editEnrollmentType === 'scholarship' ? editScholarshipFeePaid : false,
+      application_fee: editEnrollmentType === 'scholarship' ? 40000 : undefined,
       completed_at: editStatus === 'completed' || editProgress === 100 ? new Date().toISOString() : undefined
     });
 
@@ -87,13 +96,16 @@ export default function AdminEnrollmentsPage() {
       student_id: newStudentId,
       course_id: newCourseId,
       status: newStatus,
-      progress_percentage: Number(newProgress)
+      progress_percentage: Number(newProgress),
+      enrollment_type: newEnrollmentType,
+      scholarship_fee_paid: newEnrollmentType === 'scholarship' ? newScholarshipFeePaid : false
     });
 
     setShowCreateModal(false);
     setNewStudentId('');
     setNewCourseId('');
     setNewProgress(0);
+    setNewEnrollmentType('regular');
   };
 
   // Helper to find student name & email
@@ -246,6 +258,16 @@ export default function AdminEnrollmentsPage() {
                     <td className="py-3.5">
                       <div className="text-cyan-300 font-semibold">{enr.course?.title || 'MashTech Course'}</div>
                       <div className="text-[10px] text-slate-500">{enr.course?.category || 'Technology'}</div>
+                      {enr.enrollment_type === 'scholarship' ? (
+                        <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/80 text-amber-300 border border-amber-800">
+                          <GraduationCap className="w-3 h-3 text-amber-400" />
+                          <span>Scholarship (₦40k {enr.scholarship_fee_paid !== false ? 'Paid' : 'Unpaid'})</span>
+                        </div>
+                      ) : (
+                        <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-950/80 text-blue-300 border border-blue-800">
+                          <span>Standard Tuition</span>
+                        </div>
+                      )}
                     </td>
                     <td className="py-3.5">
                       <div className="flex items-center gap-2.5">
@@ -374,6 +396,34 @@ export default function AdminEnrollmentsPage() {
                   <option value="completed">Completed (Graduated)</option>
                   <option value="dropped">Dropped / Suspended</option>
                 </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Admission Track</label>
+                  <select
+                    value={editEnrollmentType}
+                    onChange={(e) => setEditEnrollmentType(e.target.value as any)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  >
+                    <option value="regular">Standard Tuition</option>
+                    <option value="scholarship">Scholarship Track (₦40k)</option>
+                  </select>
+                </div>
+
+                {editEnrollmentType === 'scholarship' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Scholarship Form Fee</label>
+                    <select
+                      value={editScholarshipFeePaid ? 'paid' : 'unpaid'}
+                      onChange={(e) => setEditScholarshipFeePaid(e.target.value === 'paid')}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400"
+                    >
+                      <option value="paid">₦40,000 Verified & Paid</option>
+                      <option value="unpaid">Pending / Unpaid</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
               {/* Progress Slider & Input */}
@@ -520,6 +570,34 @@ export default function AdminEnrollmentsPage() {
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Admission Track</label>
+                  <select
+                    value={newEnrollmentType}
+                    onChange={(e) => setNewEnrollmentType(e.target.value as any)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  >
+                    <option value="regular">Standard Tuition</option>
+                    <option value="scholarship">Scholarship Track (₦40k Form Fee)</option>
+                  </select>
+                </div>
+
+                {newEnrollmentType === 'scholarship' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Application Form Fee</label>
+                    <select
+                      value={newScholarshipFeePaid ? 'paid' : 'unpaid'}
+                      onChange={(e) => setNewScholarshipFeePaid(e.target.value === 'paid')}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-400"
+                    >
+                      <option value="paid">₦40,000 Verified & Paid</option>
+                      <option value="unpaid">Pending / Unpaid</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div className="pt-2 flex gap-3">

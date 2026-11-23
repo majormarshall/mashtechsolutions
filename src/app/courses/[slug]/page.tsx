@@ -23,7 +23,8 @@ import {
   AlertCircle,
   Building2,
   Copy,
-  Check
+  Check,
+  GraduationCap
 } from 'lucide-react';
 import { OFFICIAL_BANK_ACCOUNTS } from '@/lib/data/bankAccounts';
 
@@ -33,6 +34,7 @@ export default function CourseDetailsPage() {
   const slug = params?.slug as string;
   const { courses, enrollInCourse, enrollments, currentUser } = useData();
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [admissionTrack, setAdmissionTrack] = useState<'regular' | 'scholarship'>('regular');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'paystack'>('bank_transfer');
@@ -44,6 +46,8 @@ export default function CourseDetailsPage() {
   const isAlreadyEnrolled = currentUser 
     ? enrollments.some((e) => e.student_id === currentUser.id && e.course_id === course.id)
     : false;
+
+  const currentAmount = admissionTrack === 'scholarship' ? 40000 : course.price;
 
   const handleCopyAccount = (accNum: string) => {
     navigator.clipboard.writeText(accNum);
@@ -59,7 +63,9 @@ export default function CourseDetailsPage() {
       enrollInCourse(course.id, {
         method: `Direct Bank Transfer (${selectedBank})`,
         bank: selectedBank,
-        reference: `MTS_TRF_${selectedBank.toUpperCase()}_${Math.floor(10000000 + Math.random() * 90000000)}`
+        reference: `MTS_TRF_${selectedBank.toUpperCase()}_${Math.floor(10000000 + Math.random() * 90000000)}`,
+        enrollment_type: admissionTrack,
+        scholarship_fee_paid: admissionTrack === 'scholarship'
       });
       confetti({
         particleCount: 100,
@@ -79,7 +85,9 @@ export default function CourseDetailsPage() {
       setPaymentSuccess(true);
       enrollInCourse(course.id, {
         method: 'Paystack Automated Gateway',
-        reference: `MTS_PAY_${Math.floor(100000000 + Math.random() * 900000000)}`
+        reference: `MTS_PAY_${Math.floor(100000000 + Math.random() * 900000000)}`,
+        enrollment_type: admissionTrack,
+        scholarship_fee_paid: admissionTrack === 'scholarship'
       });
       confetti({
         particleCount: 100,
@@ -255,13 +263,29 @@ export default function CourseDetailsPage() {
               </div>
 
               {/* Pricing */}
-              <div>
-                <span className="text-xs text-slate-400 uppercase tracking-wider block">One-time Tuition</span>
-                <div className="flex items-baseline gap-2 mt-1">
-                  <span className="text-3xl font-black text-white">₦{course.price.toLocaleString()}</span>
-                  <span className="text-xs text-emerald-400 font-semibold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">
-                    All-Inclusive
-                  </span>
+              <div className="space-y-3">
+                <div>
+                  <span className="text-xs text-slate-400 uppercase tracking-wider block">One-time Tuition</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-3xl font-black text-white">₦{course.price.toLocaleString()}</span>
+                    <span className="text-xs text-emerald-400 font-semibold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">
+                      Standard
+                    </span>
+                  </div>
+                </div>
+
+                {/* Scholarship Track Option Box */}
+                <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-500/30 space-y-1">
+                  <div className="flex items-center justify-between text-xs font-bold text-amber-400">
+                    <span className="flex items-center gap-1.5">
+                      <GraduationCap className="w-4 h-4 text-amber-400" />
+                      <span>Scholarship Admission Track</span>
+                    </span>
+                    <span className="text-amber-300 font-black">₦40,000</span>
+                  </div>
+                  <p className="text-[11px] text-amber-200/80 leading-relaxed">
+                    Apply for 100% tuition sponsorship. Screening examination & application form fee: ₦40,000.
+                  </p>
                 </div>
               </div>
 
@@ -285,7 +309,7 @@ export default function CourseDetailsPage() {
                   className="w-full py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 via-cyan-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/30 hover:brightness-110 transition-all flex items-center justify-center gap-2"
                 >
                   <CreditCard className="w-4 h-4" />
-                  <span>{currentUser ? 'Enroll with Paystack' : 'Sign In to Enroll'}</span>
+                  <span>{currentUser ? 'Enroll Now / Apply for Scholarship' : 'Sign In to Enroll'}</span>
                 </button>
               )}
 
@@ -353,19 +377,66 @@ export default function CourseDetailsPage() {
               </div>
             ) : (
               <div className="space-y-5">
+                {/* Admission Track Selector: Standard vs Scholarship */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-300">Select Admission Track:</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAdmissionTrack('regular')}
+                      className={`p-3 rounded-2xl border text-left transition-all ${
+                        admissionTrack === 'regular'
+                          ? 'bg-blue-950/80 border-cyan-400 text-white shadow-md'
+                          : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between font-bold text-xs">
+                        <span>Standard Tuition</span>
+                        <span className="text-cyan-400">₦{course.price.toLocaleString()}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1">Full 12-week cohort access, live mentoring & diploma.</p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setAdmissionTrack('scholarship')}
+                      className={`p-3 rounded-2xl border text-left transition-all ${
+                        admissionTrack === 'scholarship'
+                          ? 'bg-amber-950/70 border-amber-400 text-white shadow-md'
+                          : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between font-bold text-xs">
+                        <span className="flex items-center gap-1 text-amber-300">
+                          <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Scholarship Track</span>
+                        </span>
+                        <span className="text-amber-400 font-black">₦40,000</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1">Application form & screening examination fee.</p>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Tuition Summary Box */}
                 <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
                   <div className="flex justify-between text-xs text-slate-400">
                     <span>Selected Track:</span>
-                    <span className="text-white font-semibold">{course.title}</span>
+                    <span className="text-white font-semibold">
+                      {course.title} {admissionTrack === 'scholarship' ? '(Scholarship Track)' : ''}
+                    </span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Student Learner:</span>
+                    <span>Student Applicant:</span>
                     <span className="text-white font-semibold">{currentUser?.full_name || 'Student'}</span>
                   </div>
                   <div className="pt-2 border-t border-slate-800 flex justify-between items-baseline">
-                    <span className="text-xs text-slate-300 font-bold">Total Tuition Fee:</span>
-                    <span className="text-2xl font-black text-cyan-400">₦{course.price.toLocaleString()}</span>
+                    <span className="text-xs text-slate-300 font-bold">
+                      {admissionTrack === 'scholarship' ? 'Scholarship Application Form Fee:' : 'Total Tuition Fee:'}
+                    </span>
+                    <span className={`text-2xl font-black ${admissionTrack === 'scholarship' ? 'text-amber-400' : 'text-cyan-400'}`}>
+                      ₦{currentAmount.toLocaleString()}
+                    </span>
                   </div>
                 </div>
 
@@ -406,7 +477,7 @@ export default function CourseDetailsPage() {
                         <span className="text-[10px] text-cyan-400">Instant credit & admission</span>
                       </div>
                       <p className="text-[11px] text-slate-400">
-                        Transfer <strong>₦{course.price.toLocaleString()}</strong> to any of our verified accounts:
+                        Transfer <strong>₦{currentAmount.toLocaleString()}</strong> to any of our verified accounts:
                       </p>
                     </div>
 
@@ -495,7 +566,7 @@ export default function CourseDetailsPage() {
                         {isProcessing ? (
                           <span>Confirming Bank Transfer...</span>
                         ) : (
-                          <span>I Have Sent ₦{course.price.toLocaleString()} — Confirm & Enroll</span>
+                          <span>I Have Sent ₦{currentAmount.toLocaleString()} — Confirm & Enroll</span>
                         )}
                       </button>
                     </div>
@@ -518,9 +589,9 @@ export default function CourseDetailsPage() {
                       className="w-full py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2"
                     >
                       {isProcessing ? (
-                        <span>Connecting with Paystack...</span>
+                        <span>Processing with Paystack...</span>
                       ) : (
-                        <span>Pay ₦{course.price.toLocaleString()} with Paystack</span>
+                        <span>Pay ₦{currentAmount.toLocaleString()} with Paystack</span>
                       )}
                     </button>
                   </div>

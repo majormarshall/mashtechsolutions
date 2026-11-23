@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useData } from '@/lib/context/data-context';
+import { useData, UserAccount } from '@/lib/context/data-context';
 import { UserRole } from '@/types';
 import { 
   Users, 
@@ -15,14 +15,17 @@ import {
   User, 
   Key,
   PlusCircle,
-  AlertCircle
+  AlertCircle,
+  Edit3,
+  Trash2,
+  X
 } from 'lucide-react';
 
 export default function AdminUsersPage() {
-  const { users, addAdminUser, updateUserRole } = useData();
+  const { users, addAdminUser, updateUserRole, updateUser, deleteUser, currentUser } = useData();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | UserRole>('all');
-  const [roleChangeSuccess, setRoleChangeSuccess] = useState<string | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   // Add Admin Modal State
   const [showAddAdminModal, setShowAddAdminModal] = useState(false);
@@ -33,6 +36,83 @@ export default function AdminUsersPage() {
   const [adminHeadline, setAdminHeadline] = useState('System Administrator');
   const [modalError, setModalError] = useState('');
   const [modalSuccess, setModalSuccess] = useState(false);
+
+  // Edit User Modal State
+  const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
+  const [editForm, setEditForm] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    headline: '',
+    bio: '',
+    role: 'student' as UserRole,
+    avatar_url: '',
+    password: ''
+  });
+  const [editModalError, setEditModalError] = useState('');
+  const [editModalSuccess, setEditModalSuccess] = useState(false);
+
+  const handleOpenEdit = (u: UserAccount) => {
+    setEditingUser(u);
+    setEditForm({
+      full_name: u.full_name,
+      email: u.email,
+      phone: u.phone || '',
+      headline: u.headline || '',
+      bio: u.bio || '',
+      role: u.role,
+      avatar_url: u.avatar_url || '',
+      password: u.password || ''
+    });
+    setEditModalError('');
+    setEditModalSuccess(false);
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    setEditModalError('');
+
+    if (!editForm.full_name.trim() || !editForm.email.trim()) {
+      setEditModalError('Full name and email are required.');
+      return;
+    }
+
+    updateUser(editingUser.id, {
+      full_name: editForm.full_name.trim(),
+      email: editForm.email.trim(),
+      phone: editForm.phone.trim(),
+      headline: editForm.headline.trim(),
+      bio: editForm.bio.trim(),
+      role: editForm.role,
+      avatar_url: editForm.avatar_url.trim() || editingUser.avatar_url,
+      ...(editForm.password ? { password: editForm.password } : {})
+    });
+
+    setEditModalSuccess(true);
+    setFeedbackMessage(`User ${editForm.full_name} updated successfully!`);
+    setTimeout(() => {
+      setEditModalSuccess(false);
+      setEditingUser(null);
+      setTimeout(() => setFeedbackMessage(null), 3000);
+    }, 900);
+  };
+
+  const handleDeleteUser = (u: UserAccount) => {
+    if (u.id === 'usr_admin') {
+      alert('The Primary Director Administrator account cannot be deleted.');
+      return;
+    }
+    if (confirm(`Are you sure you want to permanently delete ${u.full_name} (${u.email})? This action cannot be undone.`)) {
+      const res = deleteUser(u.id);
+      if (!res.success) {
+        alert(res.error || 'Failed to delete user.');
+      } else {
+        setFeedbackMessage(`User ${u.full_name} has been removed.`);
+        setTimeout(() => setFeedbackMessage(null), 3500);
+      }
+    }
+  };
 
   const handleAddAdmin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,8 +148,8 @@ export default function AdminUsersPage() {
 
   const handleRoleChange = (userId: string, userName: string, newRole: UserRole) => {
     updateUserRole(userId, newRole);
-    setRoleChangeSuccess(`User role for ${userName} has been updated to ${newRole.toUpperCase()}. All access privileges have been synced.`);
-    setTimeout(() => setRoleChangeSuccess(null), 4000);
+    setFeedbackMessage(`User role for ${userName} has been updated to ${newRole.toUpperCase()}. All access privileges have been synced.`);
+    setTimeout(() => setFeedbackMessage(null), 4000);
   };
 
   const filtered = users.filter(u => {
@@ -144,10 +224,10 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Alert toast message */}
-      {roleChangeSuccess && (
+      {feedbackMessage && (
         <div className="p-4 rounded-2xl bg-emerald-950 text-emerald-300 border border-emerald-800 text-xs flex items-center gap-3 animate-in fade-in">
           <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span>{roleChangeSuccess}</span>
+          <span>{feedbackMessage}</span>
         </div>
       )}
 
@@ -191,13 +271,15 @@ export default function AdminUsersPage() {
               <th className="pb-3 pl-2">User Profile</th>
               <th className="pb-3">Email Address</th>
               <th className="pb-3">Phone / Contact</th>
-              <th className="pb-3">Current Role Badge</th>
-              <th className="pb-3 text-right pr-2">Assign Privilege Level</th>
+              <th className="pb-3">Current Role</th>
+              <th className="pb-3">Assign Role</th>
+              <th className="pb-3 text-right pr-2">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-blue-950/60 text-slate-300">
             {filtered.map((u) => {
               const isAdmin = u.role === 'admin';
+              const isPrimaryAdmin = u.id === 'usr_admin';
               return (
                 <tr key={u.id} className="hover:bg-blue-900/20 transition-colors">
                   <td className="py-3.5 pl-2 font-bold text-white flex items-center gap-3">
@@ -233,7 +315,7 @@ export default function AdminUsersPage() {
                       <span>{u.role}</span>
                     </span>
                   </td>
-                  <td className="py-3.5 text-right pr-2">
+                  <td className="py-3.5">
                     <select
                       value={u.role}
                       onChange={(e) => handleRoleChange(u.id, u.full_name, e.target.value as UserRole)}
@@ -245,12 +327,184 @@ export default function AdminUsersPage() {
                       <option value="admin">Administrator 🛡️</option>
                     </select>
                   </td>
+                  <td className="py-3.5 text-right pr-2">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleOpenEdit(u)}
+                        title="Edit User Details"
+                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-500 text-cyan-400 transition-all flex items-center gap-1 text-[11px] font-semibold px-2"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit</span>
+                      </button>
+                      {!isPrimaryAdmin && (
+                        <button
+                          onClick={() => handleDeleteUser(u)}
+                          title="Delete User"
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-red-950 border border-slate-700 hover:border-red-500 text-red-400 transition-all"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
+
+      {/* EDIT USER MODAL */}
+      {editingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-lg p-6 sm:p-8 rounded-3xl bg-[#071330] border border-cyan-500/40 shadow-2xl space-y-5 my-8">
+            <div className="flex items-center justify-between border-b border-blue-950 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-cyan-950 border border-cyan-500/30 text-cyan-400">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Edit User Profile</h3>
+                  <p className="text-xs text-slate-400">Modify credentials, roles, and bio information</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingUser(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {editModalSuccess && (
+              <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-800 text-emerald-300 text-xs font-semibold flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-emerald-400" />
+                <span>User information saved successfully!</span>
+              </div>
+            )}
+
+            {editModalError && (
+              <div className="p-3 rounded-xl bg-rose-950 border border-rose-800 text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                <span>{editModalError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveEdit} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.full_name}
+                  onChange={e => setEditForm({ ...editForm, full_name: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    value={editForm.email}
+                    onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Phone / WhatsApp</label>
+                  <input
+                    type="text"
+                    value={editForm.phone}
+                    onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Platform Role</label>
+                  <select
+                    value={editForm.role}
+                    onChange={e => setEditForm({ ...editForm, role: e.target.value as UserRole })}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-400"
+                  >
+                    <option value="student">Student</option>
+                    <option value="instructor">Instructor</option>
+                    <option value="client">Client</option>
+                    <option value="admin">Administrator 🛡️</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Headline / Title</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Senior Frontend Engineer"
+                    value={editForm.headline}
+                    onChange={e => setEditForm({ ...editForm, headline: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Bio / Profile Notes</label>
+                <textarea
+                  rows={2}
+                  value={editForm.bio}
+                  onChange={e => setEditForm({ ...editForm, bio: e.target.value })}
+                  className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Avatar Image URL</label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={editForm.avatar_url}
+                  onChange={e => setEditForm({ ...editForm, avatar_url: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Reset Password (leave empty to keep unchanged)</label>
+                <input
+                  type="password"
+                  placeholder="Enter new password"
+                  value={editForm.password}
+                  onChange={e => setEditForm({ ...editForm, password: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 font-mono"
+                />
+              </div>
+
+              <div className="pt-2 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingUser(null)}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-md transition-all flex items-center justify-center gap-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Save User Changes</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ADD ADMINISTRATOR MODAL */}
       {showAddAdminModal && (

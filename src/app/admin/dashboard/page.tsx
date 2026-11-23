@@ -66,9 +66,9 @@ export default function AdminDashboardPage() {
             <CreditCard className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-emerald-400">
-            ₦{(totalRevenue + 850000).toLocaleString()}
+            ₦{totalRevenue.toLocaleString()}
           </div>
-          <p className="text-[11px] text-emerald-300 font-medium">Via Paystack gateway</p>
+          <p className="text-[11px] text-emerald-300/80 font-medium">Direct transfers & Paystack</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#061433] border border-blue-900/60 shadow-lg space-y-2">
@@ -77,9 +77,9 @@ export default function AdminDashboardPage() {
             <Users className="w-4 h-4 text-cyan-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-white">
-            {enrollments.length + 380}
+            {enrollments.filter(e => e.status === 'active').length}
           </div>
-          <p className="text-[11px] text-cyan-400 font-medium">Across all cohorts</p>
+          <p className="text-[11px] text-cyan-400/80 font-medium">Currently active learners</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#061433] border border-blue-900/60 shadow-lg space-y-2">
@@ -88,9 +88,9 @@ export default function AdminDashboardPage() {
             <BookOpen className="w-4 h-4 text-blue-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-white">
-            {courses.length}
+            {courses.filter(c => c.status === 'published').length}
           </div>
-          <p className="text-[11px] text-blue-400 font-medium">In technology catalog</p>
+          <p className="text-[11px] text-blue-400/80 font-medium">In technology catalog</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#061433] border border-blue-900/60 shadow-lg space-y-2">
@@ -99,9 +99,9 @@ export default function AdminDashboardPage() {
             <Award className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-white">
-            {certificates.length + 84}
+            {certificates.filter(c => c.is_valid).length}
           </div>
-          <p className="text-[11px] text-amber-400 font-medium">Publicly verifiable</p>
+          <p className="text-[11px] text-amber-400/80 font-medium">Publicly verifiable</p>
         </div>
       </div>
 
@@ -113,7 +113,7 @@ export default function AdminDashboardPage() {
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-cyan-400" />
-              Paystack Transactions
+              Verified Transactions
             </h3>
             <Link href="/admin/payments" className="text-xs text-cyan-400 hover:underline">
               View All ({payments.length})
@@ -121,21 +121,29 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="space-y-3">
-            {payments.map((p) => (
-              <div key={p.id} className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-white">{p.student_name}</div>
-                  <div className="text-[11px] text-slate-400">{p.course_title}</div>
-                  <div className="text-[10px] text-cyan-400 font-mono mt-0.5">{p.reference}</div>
-                </div>
-                <div className="text-right">
-                  <div className="font-black text-white">₦{p.amount.toLocaleString()}</div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 font-bold border border-emerald-800">
-                    {p.status.toUpperCase()}
-                  </span>
-                </div>
+            {payments.length === 0 ? (
+              <div className="p-8 text-center rounded-2xl bg-slate-900/50 border border-slate-800/80 space-y-2">
+                <CreditCard className="w-8 h-8 text-slate-600 mx-auto" />
+                <p className="text-xs font-semibold text-slate-300">No payment transactions recorded yet</p>
+                <p className="text-[11px] text-slate-500">Student enrollments, scholarship application fees, and project payments will appear here in real time.</p>
               </div>
-            ))}
+            ) : (
+              payments.map((p) => (
+                <div key={p.id} className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs">
+                  <div>
+                    <div className="font-bold text-white">{p.student_name}</div>
+                    <div className="text-[11px] text-slate-400">{p.course_title}</div>
+                    <div className="text-[10px] text-cyan-400 font-mono mt-0.5">{p.reference}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-black text-white">₦{p.amount.toLocaleString()}</div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 font-bold border border-emerald-800">
+                      {p.status.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -147,7 +155,7 @@ export default function AdminDashboardPage() {
               User Accounts
             </h3>
             <Link href="/admin/users" className="text-xs text-cyan-400 hover:underline">
-              Manage Users
+              Manage Users ({users.length})
             </Link>
           </div>
 

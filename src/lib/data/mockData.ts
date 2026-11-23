@@ -25,48 +25,8 @@ export const INITIAL_PROFILES: Profile[] = [
     role: 'admin',
     avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
     headline: 'Founder & Lead Systems Architect',
-    bio: 'Director of MashTech Solutions with over 12 years of hands-on technology education, infrastructure engineering, and cloud platforms experience.',
+    bio: 'Director of MashTech Solutions with extensive technology education, infrastructure engineering, and cloud platforms experience.',
     phone: '+2347058124966',
-  },
-  {
-    id: 'usr_inst_1',
-    email: 'instructor@mashtech.ng',
-    full_name: 'Dr. David Okon',
-    role: 'instructor',
-    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-    headline: 'Senior Full Stack & Cybersecurity Lead',
-    bio: 'Experienced software engineer and certified ethical hacker. Passionate about mentoring aspiring developers and security professionals.',
-    phone: '+2348106071514',
-  },
-  {
-    id: 'usr_inst_2',
-    email: 'sarah.adeleke@mashtech.ng',
-    full_name: 'Sarah Adeleke',
-    role: 'instructor',
-    avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400',
-    headline: 'Lead Product & UI/UX Designer',
-    bio: 'Former FinTech UX lead specializing in Figma design systems, interaction patterns, and human-centered digital experiences.',
-    phone: '+2348030001234',
-  },
-  {
-    id: 'usr_student',
-    email: 'student@mashtech.ng',
-    full_name: 'Alex Marshall',
-    role: 'student',
-    avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400',
-    headline: 'Aspiring Full Stack Engineer',
-    bio: 'Active student at MashTech Solutions pursuing Web Development and Cyber Security.',
-    phone: '+2347058124966',
-  },
-  {
-    id: 'usr_client_1',
-    email: 'client@apexholding.ng',
-    full_name: 'Boma Lawson',
-    role: 'client',
-    avatar_url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400',
-    headline: 'Operations Director, Apex Holdings Ltd',
-    bio: 'Commissioning digital web solutions, custom dashboards, and enterprise team training.',
-    phone: '+2348023456789',
   }
 ];
 
@@ -78,14 +38,14 @@ export const INITIAL_COURSES: Course[] = [
     description: 'Master modern web engineering from clean frontend UI with Tailwind CSS and Next.js App Router to scalable Supabase PostgreSQL backends, Auth, and Vercel cloud deployment.',
     thumbnail_url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800',
     category: 'Web Development',
-    instructor_id: 'usr_inst_1',
-    instructor_name: 'Dr. David Okon',
+    instructor_id: 'usr_admin',
+    instructor_name: 'MashTech Faculty',
     duration: '12 Weeks',
     level: 'Beginner',
     price: 45000,
     is_free: false,
     status: 'published',
-    enrolled_count: 142,
+    enrolled_count: 0,
     requirements: [
       'A working laptop or desktop (Windows, Mac, or Linux)',
       'Basic computer literacy and internet access',
@@ -189,14 +149,14 @@ export const INITIAL_COURSES: Course[] = [
     description: 'Practical offensive and defensive security training. Learn penetration testing, network sniffing, web application vulnerability assessment, and Linux hardening.',
     thumbnail_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800',
     category: 'Cyber Security',
-    instructor_id: 'usr_inst_1',
-    instructor_name: 'Dr. David Okon',
+    instructor_id: 'usr_admin',
+    instructor_name: 'MashTech Faculty',
     duration: '10 Weeks',
     level: 'Intermediate',
     price: 60000,
     is_free: false,
     status: 'published',
-    enrolled_count: 98,
+    enrolled_count: 0,
     requirements: [
       'Basic networking concepts (IP, ports, DNS)',
       'A 64-bit laptop with at least 8GB RAM for virtual labs'
@@ -236,14 +196,14 @@ export const INITIAL_COURSES: Course[] = [
     description: 'Learn programming fundamentals from scratch with Python. Master algorithms, automated scripts, file handling, APIs, and data analysis.',
     thumbnail_url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800',
     category: 'Programming',
-    instructor_id: 'usr_inst_1',
-    instructor_name: 'Dr. David Okon',
+    instructor_id: 'usr_admin',
+    instructor_name: 'MashTech Faculty',
     duration: '8 Weeks',
     level: 'Beginner',
     price: 35000,
     is_free: false,
     status: 'published',
-    enrolled_count: 210,
+    enrolled_count: 0,
     requirements: ['No prior programming background required', 'Curiosity and passion to solve problems'],
     learning_outcomes: [
       'Write clean, modular, object-oriented Python code',
@@ -259,14 +219,14 @@ export const INITIAL_COURSES: Course[] = [
     description: 'From wireframes to interactive Figma prototypes. Learn UX research methodologies, design tokens, responsive UI layout, and product usability testing.',
     thumbnail_url: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800',
     category: 'Product Design',
-    instructor_id: 'usr_inst_2',
-    instructor_name: 'Sarah Adeleke',
+    instructor_id: 'usr_admin',
+    instructor_name: 'MashTech Faculty',
     duration: '8 Weeks',
     level: 'Beginner',
     price: 35000,
     is_free: false,
     status: 'published',
-    enrolled_count: 115,
+    enrolled_count: 0,
     requirements: ['A computer with modern web browser for Figma', 'Creative mindset and eye for detail'],
     learning_outcomes: [
       'Master Figma auto-layout, components, and design variants',
@@ -282,14 +242,14 @@ export const INITIAL_COURSES: Course[] = [
     description: 'Learn to design, deploy, and scale modern cloud architectures. Hands-on labs with serverless computing, cloud storage, relational SQL databases, and CI/CD pipelines.',
     thumbnail_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800',
     category: 'Cloud Computing',
-    instructor_id: 'usr_inst_1',
-    instructor_name: 'Dr. David Okon',
+    instructor_id: 'usr_admin',
+    instructor_name: 'MashTech Faculty',
     duration: '8 Weeks',
     level: 'Intermediate',
     price: 50000,
     is_free: false,
     status: 'published',
-    enrolled_count: 76,
+    enrolled_count: 0,
     requirements: ['Basic understanding of web technologies and command line'],
     learning_outcomes: [
       'Deploy serverless workloads on AWS and cloud providers',
@@ -305,14 +265,14 @@ export const INITIAL_COURSES: Course[] = [
     description: 'Learn professional graphic design for commercial branding, advertising banners, event flyers, typography, and vector printing.',
     thumbnail_url: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800',
     category: 'Creative Design',
-    instructor_id: 'usr_inst_2',
-    instructor_name: 'Sarah Adeleke',
+    instructor_id: 'usr_admin',
+    instructor_name: 'MashTech Faculty',
     duration: '6 Weeks',
     level: 'Beginner',
     price: 30000,
     is_free: false,
     status: 'published',
-    enrolled_count: 180,
+    enrolled_count: 0,
     requirements: ['PC or Mac capable of running Photoshop or CorelDraw'],
     learning_outcomes: [
       'Design high-impact social media flyers and billboards',
@@ -328,14 +288,14 @@ export const INITIAL_COURSES: Course[] = [
     description: 'Build native iOS and Android mobile apps from a single codebase. Learn state management, camera/GPS access, push notifications, and App Store submission.',
     thumbnail_url: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800',
     category: 'Mobile App Development',
-    instructor_id: 'usr_inst_1',
-    instructor_name: 'Dr. David Okon',
+    instructor_id: 'usr_admin',
+    instructor_name: 'MashTech Faculty',
     duration: '10 Weeks',
     level: 'Intermediate',
     price: 50000,
     is_free: false,
     status: 'published',
-    enrolled_count: 64,
+    enrolled_count: 0,
     requirements: ['Familiarity with JavaScript or OOP principles'],
     learning_outcomes: [
       'Publish cross-platform mobile apps to Google Play Store',
@@ -351,14 +311,14 @@ export const INITIAL_COURSES: Course[] = [
     description: 'Extract business intelligence from complex data. Learn Pandas, NumPy, data visualization, predictive statistics, and dynamic PowerBI dashboards.',
     thumbnail_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800',
     category: 'Data Science & Analytics',
-    instructor_id: 'usr_inst_1',
-    instructor_name: 'Dr. David Okon',
+    instructor_id: 'usr_admin',
+    instructor_name: 'MashTech Faculty',
     duration: '10 Weeks',
     level: 'Beginner',
     price: 45000,
     is_free: false,
     status: 'published',
-    enrolled_count: 85,
+    enrolled_count: 0,
     requirements: ['Basic spreadsheet familiarity', 'No prior coding needed'],
     learning_outcomes: [
       'Analyze enterprise datasets with Python and Pandas',
@@ -369,225 +329,23 @@ export const INITIAL_COURSES: Course[] = [
   }
 ];
 
-export const INITIAL_ENROLLMENTS: Enrollment[] = [
-  {
-    id: 'enr_1',
-    student_id: 'usr_student',
-    course_id: 'course_web_dev',
-    course: INITIAL_COURSES[0],
-    status: 'active',
-    progress_percentage: 75,
-    enrolled_at: '2026-09-15T09:00:00Z'
-  },
-  {
-    id: 'enr_2',
-    student_id: 'usr_student',
-    course_id: 'course_cyber_sec',
-    course: INITIAL_COURSES[1],
-    status: 'active',
-    progress_percentage: 40,
-    enrolled_at: '2026-10-01T10:30:00Z'
-  }
-];
+export const INITIAL_ENROLLMENTS: Enrollment[] = [];
 
-export const INITIAL_LIVE_CLASSES: LiveClass[] = [
-  {
-    id: 'live_1',
-    course_id: 'course_web_dev',
-    course_title: 'Full Stack Web Development',
-    instructor_id: 'usr_inst_1',
-    instructor_name: 'Dr. David Okon',
-    title: 'Live Workshop: Building Supabase RLS Policies & Auth Integration',
-    description: 'Join us live as we live-code custom PostgreSQL Row Level Security policies, handle OAuth session persistence, and answer your real-time coding questions.',
-    start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
-    meeting_url: 'https://meet.google.com/xyz-mashtech-live',
-    platform: 'Google Meet',
-    status: 'scheduled'
-  },
-  {
-    id: 'live_2',
-    course_id: 'course_cyber_sec',
-    course_title: 'Cyber Security: Ethical Hacking',
-    instructor_id: 'usr_inst_1',
-    instructor_name: 'Dr. David Okon',
-    title: 'Hands-on Penetration Testing Lab Walkthrough',
-    description: 'Live interactive hacking lab: reconnaissance, port scanning, and identifying common web vulnerabilities.',
-    start_time: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-    meeting_url: 'https://meet.google.com/sec-mashtech-pentest',
-    platform: 'Google Meet',
-    status: 'scheduled'
-  }
-];
+export const INITIAL_LIVE_CLASSES: LiveClass[] = [];
 
-export const INITIAL_ASSIGNMENTS: Assignment[] = [
-  {
-    id: 'assgn_1',
-    course_id: 'course_web_dev',
-    course_title: 'Full Stack Web Development',
-    title: 'Assignment 1: Responsive Product Landing Page with Tailwind CSS',
-    description: 'Design and code a fully responsive tech product landing page using Next.js and Tailwind CSS. Ensure it looks sharp on mobile, tablet, and desktop.',
-    due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-    max_score: 100
-  },
-  {
-    id: 'assgn_2',
-    course_id: 'course_cyber_sec',
-    course_title: 'Cyber Security: Ethical Hacking',
-    title: 'Assignment 1: Network Reconnaissance & Security Audit Report',
-    description: 'Use Nmap and Wireshark inside your test lab to scan open ports, identify running services, and draft an executive vulnerability mitigation memo.',
-    due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    max_score: 100
-  }
-];
+export const INITIAL_ASSIGNMENTS: Assignment[] = [];
 
-export const INITIAL_SUBMISSIONS: Submission[] = [
-  {
-    id: 'sub_1',
-    assignment_id: 'assgn_1',
-    assignment_title: 'Assignment 1: Responsive Product Landing Page with Tailwind CSS',
-    course_title: 'Full Stack Web Development',
-    student_id: 'usr_student',
-    student_name: 'Alex Marshall',
-    text_content: 'Completed the responsive landing page with dark mode support and interactive hero cards. Deployed demo: https://mashtech-demo-landing.vercel.app',
-    file_url: 'https://github.com/majormarshall/landing-page-demo.zip',
-    score: 95,
-    feedback: 'Excellent attention to design consistency, clean Tailwind styling, and smooth accessibility!',
-    status: 'graded',
-    submitted_at: '2026-11-18T14:20:00Z',
-    graded_at: '2026-11-19T10:00:00Z'
-  }
-];
+export const INITIAL_SUBMISSIONS: Submission[] = [];
 
-export const INITIAL_MATERIALS: Material[] = [
-  {
-    id: 'mat_1',
-    course_id: 'course_web_dev',
-    course_title: 'Full Stack Web Development',
-    title: 'Next.js 15+ & React 19 Cheat Sheet & Architectural Guide.pdf',
-    file_url: '#',
-    file_type: 'pdf',
-    file_size_kb: 2450
-  },
-  {
-    id: 'mat_2',
-    course_id: 'course_web_dev',
-    course_title: 'Full Stack Web Development',
-    title: 'Complete Starter Repository (Tailwind + Supabase).zip',
-    file_url: '#',
-    file_type: 'zip',
-    file_size_kb: 5120
-  },
-  {
-    id: 'mat_3',
-    course_id: 'course_cyber_sec',
-    course_title: 'Cyber Security: Ethical Hacking',
-    title: 'Wireshark Packet Analysis Lab Notes & Cheat Sheet.pdf',
-    file_url: '#',
-    file_type: 'pdf',
-    file_size_kb: 3820
-  }
-];
+export const INITIAL_MATERIALS: Material[] = [];
 
-export const INITIAL_CERTIFICATES: Certificate[] = [
-  {
-    id: 'cert_1',
-    student_id: 'usr_student',
-    student_name: 'Alex Marshall',
-    course_id: 'course_python',
-    course_title: 'Programming: Python from Zero to Hero',
-    certificate_number: 'MTS-2026-PY-8841',
-    issue_date: '2026-11-15T00:00:00Z',
-    verification_code: 'VFY-8841-MTS',
-    is_valid: true
-  }
-];
+export const INITIAL_CERTIFICATES: Certificate[] = [];
 
-export const INITIAL_DISCUSSIONS: DiscussionMessage[] = [
-  {
-    id: 'disc_1',
-    course_id: 'course_web_dev',
-    user_id: 'usr_inst_1',
-    user_name: 'Dr. David Okon',
-    user_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-    user_role: 'instructor',
-    message: 'Welcome everyone to the Full Stack Web Development cohort! Please check Module 1 resources and post any questions regarding your development environment setup here.',
-    created_at: '2026-11-10T08:00:00Z'
-  },
-  {
-    id: 'disc_2',
-    course_id: 'course_web_dev',
-    user_id: 'usr_student',
-    user_name: 'Alex Marshall',
-    user_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400',
-    user_role: 'student',
-    message: 'Thanks Dr. Okon! The Supabase RLS explanations made PostgreSQL security so intuitive. Looking forward to tomorrow’s live session!',
-    created_at: '2026-11-11T12:30:00Z'
-  }
-];
+export const INITIAL_DISCUSSIONS: DiscussionMessage[] = [];
 
-export const INITIAL_NOTIFICATIONS: Notification[] = [
-  {
-    id: 'notif_1',
-    user_id: 'usr_student',
-    title: 'Upcoming Live Class Tomorrow',
-    message: 'Building Supabase RLS Policies & Auth Integration starts tomorrow at 6:00 PM WAT.',
-    link: '/student/live-classes',
-    type: 'class',
-    is_read: false,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: 'notif_2',
-    user_id: 'usr_student',
-    title: 'Assignment Graded: 95/100',
-    message: 'Dr. David Okon graded your Responsive Product Landing Page assignment with feedback.',
-    link: '/student/assignments',
-    type: 'grade',
-    is_read: false,
-    created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'notif_3',
-    user_id: 'usr_student',
-    title: 'Certificate Issued!',
-    message: 'Your certificate for Python from Zero to Hero is ready for verification & download.',
-    link: '/student/certificates',
-    type: 'certificate',
-    is_read: true,
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-  }
-];
+export const INITIAL_NOTIFICATIONS: Notification[] = [];
 
-export const INITIAL_PAYMENTS: PaymentRecord[] = [
-  {
-    id: 'pay_1',
-    student_id: 'usr_student',
-    student_name: 'Alex Marshall',
-    course_id: 'course_web_dev',
-    course_title: 'Full Stack Web Development',
-    amount: 45000,
-    currency: 'NGN',
-    reference: 'MTS_PAY_874182931',
-    status: 'success',
-    payment_method: 'Paystack Card / Transfer',
-    paid_at: '2026-09-15T08:58:00Z',
-    created_at: '2026-09-15T08:55:00Z'
-  },
-  {
-    id: 'pay_2',
-    student_id: 'usr_student',
-    student_name: 'Alex Marshall',
-    course_id: 'course_cyber_sec',
-    course_title: 'Cyber Security: Ethical Hacking',
-    amount: 60000,
-    currency: 'NGN',
-    reference: 'MTS_PAY_993182103',
-    status: 'success',
-    payment_method: 'Paystack Bank Transfer',
-    paid_at: '2026-10-01T10:28:00Z',
-    created_at: '2026-10-01T10:25:00Z'
-  }
-];
+export const INITIAL_PAYMENTS: PaymentRecord[] = [];
 
 // ============================================================
 // DIGITAL SERVICES STUDIO OFFERINGS

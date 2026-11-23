@@ -69,12 +69,19 @@ export interface Material {
 export interface Enrollment {
   id: string;
   student_id: string;
+  student_name?: string;
+  student_email?: string;
   course_id: string;
   course?: Course;
   status: 'active' | 'completed' | 'cancelled' | 'dropped';
   progress_percentage: number;
   enrolled_at: string;
   completed_at?: string;
+  enrollment_type?: 'regular' | 'scholarship';
+  scholarship_fee_paid?: boolean;
+  application_fee?: number;
+  payment_method?: 'paystack' | 'bank_transfer' | 'manual';
+  payment_ref?: string;
 }
 
 export interface LiveClass {

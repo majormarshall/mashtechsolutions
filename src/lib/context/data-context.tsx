@@ -69,7 +69,7 @@ interface DataContextType {
   instructorApplications: InstructorApplication[];
   
   // Actions
-  enrollInCourse: (courseId: string, paymentInfo?: { method?: string; reference?: string; bank?: string }) => void;
+  enrollInCourse: (courseId: string, paymentInfo?: { method?: string; reference?: string; bank?: string; enrollment_type?: 'regular' | 'scholarship'; scholarship_fee_paid?: boolean }) => void;
   completeLesson: (courseId: string, lessonId: string) => void;
   submitAssignment: (assignmentId: string, text: string, fileUrl?: string) => void;
   gradeSubmission: (submissionId: string, score: number, feedback: string) => void;
@@ -94,8 +94,18 @@ interface DataContextType {
 
   // Enrollment & User Administration
   addAdminUser: (data: { full_name: string; email: string; phone: string; password: string; headline?: string }) => { success: boolean; error?: string };
+  addInstructorUser: (data: { full_name: string; email: string; phone?: string; password?: string; headline?: string; bio?: string; avatar_url?: string }) => { success: boolean; error?: string; user?: UserAccount };
+  updateUser: (userId: string, updates: Partial<UserAccount>) => void;
+  deleteUser: (userId: string) => { success: boolean; error?: string };
   updateUserRole: (userId: string, newRole: UserRole) => void;
-  createEnrollment: (data: { student_id: string; course_id: string; status?: Enrollment['status']; progress_percentage?: number }) => Enrollment;
+  createEnrollment: (data: { 
+    student_id: string; 
+    course_id: string; 
+    status?: Enrollment['status']; 
+    progress_percentage?: number;
+    enrollment_type?: 'regular' | 'scholarship';
+    scholarship_fee_paid?: boolean;
+  }) => Enrollment;
   updateEnrollment: (enrollmentId: string, updates: Partial<Enrollment>) => void;
   deleteEnrollment: (enrollmentId: string) => void;
 }
@@ -110,7 +120,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Registered Accounts List
+  // Registered Accounts List - Clean state with only verified Director Admin initially
   const [registeredAccounts, setRegisteredAccounts] = useState<UserAccount[]>([
     {
       id: 'usr_admin',
@@ -121,36 +131,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       headline: 'Founder & Lead Systems Architect',
       phone: '+2347058124966',
       password: ADMIN_PASSWORD
-    },
-    {
-      id: 'usr_inst_1',
-      email: 'instructor@mashtech.ng',
-      full_name: 'Dr. David Okon',
-      role: 'instructor',
-      avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-      headline: 'Senior Full Stack & Cybersecurity Lead',
-      phone: '+2348106071514',
-      password: 'password123'
-    },
-    {
-      id: 'usr_student',
-      email: 'student@mashtech.ng',
-      full_name: 'Alex Marshall',
-      role: 'student',
-      avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400',
-      headline: 'Aspiring Full Stack Engineer',
-      phone: '+2347058124966',
-      password: 'password123'
-    },
-    {
-      id: 'usr_client_1',
-      email: 'client@apexholding.ng',
-      full_name: 'Boma Lawson',
-      role: 'client',
-      avatar_url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400',
-      headline: 'Operations Director, Apex Holdings Ltd',
-      phone: '+2348023456789',
-      password: 'password123'
     }
   ]);
 
@@ -177,11 +157,32 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     try {
       const savedUser = localStorage.getItem('mashtech_current_user');
       if (savedUser) {
-        setCurrentUser(JSON.parse(savedUser));
+        const parsedUser = JSON.parse(savedUser);
+        if (parsedUser && !['usr_inst_1', 'usr_student', 'usr_client_1'].includes(parsedUser.id)) {
+          setCurrentUser(parsedUser);
+        } else if (parsedUser?.role === 'admin') {
+          setCurrentUser(parsedUser);
+        } else {
+          localStorage.removeItem('mashtech_current_user');
+        }
       }
       const savedAccounts = localStorage.getItem('mashtech_registered_accounts');
       if (savedAccounts) {
-        setRegisteredAccounts(JSON.parse(savedAccounts));
+        const parsed: UserAccount[] = JSON.parse(savedAccounts);
+        const filtered = parsed.filter(u => !['usr_inst_1', 'usr_student', 'usr_client_1'].includes(u.id));
+        if (!filtered.some(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase())) {
+          filtered.unshift({
+            id: 'usr_admin',
+            email: ADMIN_EMAIL,
+            full_name: 'Engr. Marshall (Director)',
+            role: 'admin',
+            avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+            headline: 'Founder & Lead Systems Architect',
+            phone: '+2347058124966',
+            password: ADMIN_PASSWORD
+          });
+        }
+        setRegisteredAccounts(filtered);
       }
       const savedCourses = localStorage.getItem('mashtech_courses');
       if (savedCourses) {
@@ -189,7 +190,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }
       const savedEnrollments = localStorage.getItem('mashtech_enrollments');
       if (savedEnrollments) {
-        setEnrollments(JSON.parse(savedEnrollments));
+        const parsed: Enrollment[] = JSON.parse(savedEnrollments);
+        const filtered = parsed.filter(e => e.student_id !== 'usr_student');
+        setEnrollments(filtered);
+      }
+      const savedPayments = localStorage.getItem('mashtech_payments');
+      if (savedPayments) {
+        const parsed: PaymentRecord[] = JSON.parse(savedPayments);
+        const filtered = parsed.filter(p => p.student_id !== 'usr_student');
+        setPayments(filtered);
       }
       const savedServices = localStorage.getItem('mashtech_services');
       if (savedServices) {
@@ -253,6 +262,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setRegisteredAccounts(updatedAccounts);
     try {
       localStorage.setItem('mashtech_registered_accounts', JSON.stringify(updatedAccounts));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Helper to persist payments
+  const persistPayments = (updatedPayments: PaymentRecord[]) => {
+    setPayments(updatedPayments);
+    try {
+      localStorage.setItem('mashtech_payments', JSON.stringify(updatedPayments));
     } catch (e) {
       console.error(e);
     }
@@ -391,6 +410,77 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return { success: true };
   };
 
+  // Add new Instructor directly from Admin or Faculty Portal
+  const addInstructorUser = (data: {
+    full_name: string;
+    email: string;
+    phone?: string;
+    password?: string;
+    headline?: string;
+    bio?: string;
+    avatar_url?: string;
+  }): { success: boolean; error?: string; user?: UserAccount } => {
+    const cleanEmail = data.email.trim().toLowerCase();
+    if (!cleanEmail) {
+      return { success: false, error: 'Email is required.' };
+    }
+    const alreadyExists = registeredAccounts.some(u => u.email.toLowerCase() === cleanEmail);
+    if (alreadyExists) {
+      return { success: false, error: 'An account with this email address is already registered.' };
+    }
+    const newInstructor: UserAccount = {
+      id: `usr_inst_${Date.now()}`,
+      email: cleanEmail,
+      full_name: data.full_name.trim(),
+      role: 'instructor',
+      phone: data.phone?.trim() || '+2347058124966',
+      headline: data.headline?.trim() || 'Senior Technology Instructor',
+      bio: data.bio?.trim() || 'Faculty member at MashTech Solutions specializing in hands-on industry mentoring.',
+      avatar_url: data.avatar_url?.trim() || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+      password: data.password || 'password123'
+    };
+    const updated = [newInstructor, ...registeredAccounts];
+    persistAccounts(updated);
+    return { success: true, user: newInstructor };
+  };
+
+  // Edit/Update any user account
+  const updateUser = (userId: string, updates: Partial<UserAccount>) => {
+    const updated = registeredAccounts.map(u => {
+      if (u.id === userId) {
+        const merged = { ...u, ...updates };
+        if (currentUser?.id === userId) {
+          saveSession({
+            id: merged.id,
+            email: merged.email,
+            full_name: merged.full_name,
+            role: merged.role,
+            avatar_url: merged.avatar_url,
+            headline: merged.headline,
+            phone: merged.phone,
+            bio: merged.bio
+          });
+        }
+        return merged;
+      }
+      return u;
+    });
+    persistAccounts(updated);
+  };
+
+  // Delete user account (cannot delete primary Director admin)
+  const deleteUser = (userId: string): { success: boolean; error?: string } => {
+    if (userId === 'usr_admin') {
+      return { success: false, error: 'The Primary Director Administrator account cannot be deleted.' };
+    }
+    if (currentUser?.id === userId) {
+      return { success: false, error: 'You cannot delete the account you are currently logged in with.' };
+    }
+    const updated = registeredAccounts.filter(u => u.id !== userId);
+    persistAccounts(updated);
+    return { success: true };
+  };
+
   // Update user privilege role
   const updateUserRole = (userId: string, newRole: UserRole) => {
     const updated = registeredAccounts.map(u => {
@@ -406,7 +496,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     persistAccounts(updated);
   };
 
-  const enrollInCourse = (courseId: string, paymentInfo?: { method?: string; reference?: string; bank?: string }) => {
+  const enrollInCourse = (
+    courseId: string, 
+    paymentInfo?: { 
+      method?: string; 
+      reference?: string; 
+      bank?: string;
+      enrollment_type?: 'regular' | 'scholarship';
+      scholarship_fee_paid?: boolean;
+    }
+  ) => {
     if (!currentUser) return;
     const targetCourse = courses.find(c => c.id === courseId);
     if (!targetCourse) return;
@@ -414,14 +513,24 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const existing = enrollments.find(e => e.student_id === currentUser.id && e.course_id === courseId);
     if (existing) return;
 
+    const isScholarship = paymentInfo?.enrollment_type === 'scholarship';
+    const amountToCharge = isScholarship ? 40000 : targetCourse.price;
+
     const newEnrollment: Enrollment = {
       id: `enr_${Date.now()}`,
       student_id: currentUser.id,
+      student_name: currentUser.full_name,
+      student_email: currentUser.email,
       course_id: courseId,
       course: targetCourse,
       status: 'active',
       progress_percentage: 5,
-      enrolled_at: new Date().toISOString()
+      enrolled_at: new Date().toISOString(),
+      enrollment_type: isScholarship ? 'scholarship' : 'regular',
+      scholarship_fee_paid: isScholarship ? true : false,
+      application_fee: isScholarship ? 40000 : undefined,
+      payment_method: paymentInfo?.bank ? 'bank_transfer' : paymentInfo?.method === 'Paystack' ? 'paystack' : 'manual',
+      payment_ref: paymentInfo?.reference
     };
 
     persistEnrollments([newEnrollment, ...enrollments]);
@@ -438,8 +547,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       student_id: currentUser.id,
       student_name: currentUser.full_name,
       course_id: courseId,
-      course_title: targetCourse.title,
-      amount: targetCourse.price,
+      course_title: isScholarship ? `${targetCourse.title} (Scholarship Application Form)` : targetCourse.title,
+      amount: amountToCharge,
       currency: 'NGN',
       reference: paymentInfo?.reference || `MTS_PAY_${Math.floor(100000000 + Math.random() * 900000000)}`,
       status: 'success',
@@ -447,7 +556,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       paid_at: new Date().toISOString(),
       created_at: new Date().toISOString()
     };
-    setPayments(prev => [newPayment, ...prev]);
+    persistPayments([newPayment, ...payments]);
 
     // Send notification
     const newNotif: Notification = {
@@ -599,16 +708,25 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     course_id: string;
     status?: Enrollment['status'];
     progress_percentage?: number;
+    enrollment_type?: 'regular' | 'scholarship';
+    scholarship_fee_paid?: boolean;
   }): Enrollment => {
     const targetCourse = courses.find(c => c.id === data.course_id);
+    const targetUser = registeredAccounts.find(u => u.id === data.student_id);
+    const isScholarship = data.enrollment_type === 'scholarship';
     const newEnr: Enrollment = {
       id: `enr_${Date.now()}`,
       student_id: data.student_id,
+      student_name: targetUser?.full_name,
+      student_email: targetUser?.email,
       course_id: data.course_id,
       course: targetCourse,
       status: data.status || 'active',
       progress_percentage: data.progress_percentage || 0,
-      enrolled_at: new Date().toISOString()
+      enrolled_at: new Date().toISOString(),
+      enrollment_type: isScholarship ? 'scholarship' : 'regular',
+      scholarship_fee_paid: isScholarship ? (data.scholarship_fee_paid ?? true) : false,
+      application_fee: isScholarship ? 40000 : undefined
     };
     const updated = [newEnr, ...enrollments];
     persistEnrollments(updated);
@@ -838,6 +956,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       submitInstructorApplication,
       updateInstructorApplicationStatus,
       addAdminUser,
+      addInstructorUser,
+      updateUser,
+      deleteUser,
       updateUserRole,
       createEnrollment,
       updateEnrollment,

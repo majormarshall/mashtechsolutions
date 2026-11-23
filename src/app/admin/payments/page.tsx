@@ -71,59 +71,67 @@ export default function AdminPaymentsPage() {
 
       {/* Payments Table */}
       <div className="p-6 rounded-3xl bg-[#071330] border border-blue-900/60 shadow-xl overflow-x-auto">
-        <table className="w-full text-left text-xs">
-          <thead>
-            <tr className="border-b border-blue-950 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
-              <th className="pb-3 pl-2">Transaction Ref</th>
-              <th className="pb-3">Student</th>
-              <th className="pb-3">Course Track</th>
-              <th className="pb-3">Amount</th>
-              <th className="pb-3">Channel / Method</th>
-              <th className="pb-3">Verification</th>
-              <th className="pb-3">Timestamp</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-blue-950/60 text-slate-300">
-            {filtered.map((p) => (
-              <tr key={p.id} className="hover:bg-blue-900/20 transition-colors">
-                <td className="py-3.5 pl-2 font-mono text-cyan-400 font-bold">
-                  {p.reference}
-                </td>
-                <td className="py-3.5 font-bold text-white">
-                  {p.student_name || 'Enrolled Student'}
-                </td>
-                <td className="py-3.5 text-slate-200 font-medium">
-                  {p.course_title}
-                </td>
-                <td className="py-3.5 font-black text-emerald-400 text-sm">
-                  ₦{p.amount.toLocaleString()}
-                </td>
-                <td className="py-3.5">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                    p.payment_method.includes('OPay')
-                      ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                      : p.payment_method.includes('PalmPay')
-                      ? 'bg-purple-950 text-purple-300 border border-purple-800'
-                      : p.payment_method.includes('UBA')
-                      ? 'bg-red-950 text-rose-300 border border-rose-800'
-                      : 'bg-cyan-950 text-cyan-300 border border-cyan-800'
-                  }`}>
-                    {p.payment_method}
-                  </span>
-                </td>
-                <td className="py-3.5">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 inline-flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" />
-                    <span>Verified</span>
-                  </span>
-                </td>
-                <td className="py-3.5 text-slate-400">
-                  {new Date(p.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                </td>
+        {filtered.length === 0 ? (
+          <div className="py-12 text-center text-slate-400 space-y-2">
+            <CreditCard className="w-10 h-10 text-slate-600 mx-auto" />
+            <p className="text-sm font-bold text-white">No transactions recorded yet</p>
+            <p className="text-xs text-slate-500">Student tuition enrollments and scholarship form fees will be logged here automatically.</p>
+          </div>
+        ) : (
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-blue-950 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
+                <th className="pb-3 pl-2">Transaction Ref</th>
+                <th className="pb-3">Student</th>
+                <th className="pb-3">Course Track</th>
+                <th className="pb-3">Amount</th>
+                <th className="pb-3">Channel / Method</th>
+                <th className="pb-3">Verification</th>
+                <th className="pb-3">Timestamp</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-blue-950/60 text-slate-300">
+              {filtered.map((p) => (
+                <tr key={p.id} className="hover:bg-blue-900/20 transition-colors">
+                  <td className="py-3.5 pl-2 font-mono text-cyan-400 font-bold">
+                    {p.reference}
+                  </td>
+                  <td className="py-3.5 font-bold text-white">
+                    {p.student_name || 'Enrolled Student'}
+                  </td>
+                  <td className="py-3.5 text-slate-200 font-medium">
+                    {p.course_title}
+                  </td>
+                  <td className="py-3.5 font-black text-emerald-400 text-sm">
+                    ₦{p.amount.toLocaleString()}
+                  </td>
+                  <td className="py-3.5">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      p.payment_method.includes('OPay')
+                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                        : p.payment_method.includes('PalmPay')
+                        ? 'bg-purple-950 text-purple-300 border border-purple-800'
+                        : p.payment_method.includes('UBA')
+                        ? 'bg-red-950 text-rose-300 border border-rose-800'
+                        : 'bg-cyan-950 text-cyan-300 border border-cyan-800'
+                    }`}>
+                      {p.payment_method}
+                    </span>
+                  </td>
+                  <td className="py-3.5">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 inline-flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" />
+                      <span>Verified</span>
+                    </span>
+                  </td>
+                  <td className="py-3.5 text-slate-400">
+                    {new Date(p.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
