@@ -32,7 +32,9 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Courses', href: '/courses' },
-    { name: 'About Us', href: '/about' },
+    { name: 'Services', href: '/services' },
+    { name: 'Corporate Training', href: '/corporate-training' },
+    { name: 'Careers', href: '/careers' },
     { name: 'Instructors', href: '/instructors' },
     { name: 'Verify Certificate', href: '/verify-certificate' },
     { name: 'Contact', href: '/contact' },
@@ -45,6 +47,8 @@ export default function Navbar() {
         return '/admin/dashboard';
       case 'instructor':
         return '/instructor/dashboard';
+      case 'client':
+        return '/client/dashboard';
       default:
         return '/student/dashboard';
     }

@@ -1,4 +1,21 @@
-import { Course, Profile, Enrollment, LiveClass, Assignment, Submission, Certificate, DiscussionMessage, Notification, PaymentRecord, Material } from '@/types';
+import { 
+  Course, 
+  Profile, 
+  Enrollment, 
+  LiveClass, 
+  Assignment, 
+  Submission, 
+  Certificate, 
+  DiscussionMessage, 
+  Notification, 
+  PaymentRecord, 
+  Material,
+  ServiceOffering,
+  ServiceRequest,
+  ClientProject,
+  ClientInvoice,
+  InstructorApplication
+} from '@/types';
 
 export const INITIAL_PROFILES: Profile[] = [
   {
@@ -40,6 +57,16 @@ export const INITIAL_PROFILES: Profile[] = [
     headline: 'Aspiring Full Stack Engineer',
     bio: 'Active student at MashTech Solutions pursuing Web Development and Cyber Security.',
     phone: '+2347058124966',
+  },
+  {
+    id: 'usr_client_1',
+    email: 'client@apexholding.ng',
+    full_name: 'Boma Lawson',
+    role: 'client',
+    avatar_url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400',
+    headline: 'Operations Director, Apex Holdings Ltd',
+    bio: 'Commissioning digital web solutions, custom dashboards, and enterprise team training.',
+    phone: '+2348023456789',
   }
 ];
 
@@ -561,3 +588,346 @@ export const INITIAL_PAYMENTS: PaymentRecord[] = [
     created_at: '2026-10-01T10:25:00Z'
   }
 ];
+
+// ============================================================
+// DIGITAL SERVICES STUDIO OFFERINGS
+// ============================================================
+
+export const INITIAL_SERVICES: ServiceOffering[] = [
+  {
+    id: 'srv_web_landing',
+    title: 'Business Websites & Modern Landing Pages',
+    slug: 'business-websites-landing-pages',
+    category: 'Software Development',
+    short_desc: 'High-converting, responsive websites tailored for business credibility, SEO visibility, and client lead generation.',
+    description: 'We design and engineer bespoke modern websites built with Next.js, React, and Tailwind CSS. Fully responsive, blazingly fast, optimized for search engines, and integrated with contact capture, WhatsApp live chat, and analytics.',
+    starting_price: 150000,
+    delivery_time: '1–2 Weeks',
+    popular: true,
+    features: [
+      'Custom Responsive UI (Mobile, Tablet, Desktop)',
+      'Search Engine Optimization (SEO) & Performance Tuning',
+      'Contact Forms & Instant WhatsApp Lead Routing',
+      'CMS / Content Editing Integration',
+      'Free 1-Month Post-Launch Technical Support'
+    ],
+    deliverables: [
+      'Production-ready Next.js codebase',
+      'Vercel or custom cloud deployment',
+      'Domain setup & SSL certificate',
+      'Client handover training guide'
+    ]
+  },
+  {
+    id: 'srv_web_apps',
+    title: 'Custom Web Applications & Portals',
+    slug: 'custom-web-applications',
+    category: 'Software Development',
+    short_desc: 'Scalable SaaS platforms, customer portals, internal management dashboards, and booking engines.',
+    description: 'Transform your business workflows with tailor-made web applications. Featuring role-based access control, PostgreSQL databases, automated workflows, and third-party API integrations.',
+    starting_price: 350000,
+    delivery_time: '3–6 Weeks',
+    popular: true,
+    features: [
+      'Role-Based Authentication & Permissions',
+      'PostgreSQL / Supabase Database Architecture',
+      'Payment Gateway Integration (Paystack, Stripe)',
+      'Automated Email & SMS Notifications',
+      'Custom Admin Management Dashboards'
+    ],
+    deliverables: [
+      'Full-stack source code repository',
+      'Database schema & migration scripts',
+      'Interactive API documentation',
+      'Staging & production deployment setup'
+    ]
+  },
+  {
+    id: 'srv_mobile_apps',
+    title: 'Mobile App Development (iOS & Android)',
+    slug: 'mobile-app-development',
+    category: 'Software Development',
+    short_desc: 'Cross-platform mobile applications engineered with Flutter or React Native for fluid mobile user experiences.',
+    description: 'Launch intuitive, high-performance mobile apps for iOS and Android from a single unified codebase. Includes offline capabilities, push notifications, and seamless backend synchronization.',
+    starting_price: 450000,
+    delivery_time: '4–8 Weeks',
+    features: [
+      'Cross-platform iOS & Android compatibility',
+      'Push Notification Infrastructure',
+      'Biometric Login & Secure Credential Storage',
+      'Real-time data synchronization',
+      'App Store & Google Play preparation'
+    ],
+    deliverables: [
+      'Compiled APK and iOS release builds',
+      'Complete Flutter/React Native source code',
+      'App Store & Play Store publication assistance'
+    ]
+  },
+  {
+    id: 'srv_ui_ux',
+    title: 'UI/UX & Digital Product Design',
+    slug: 'ui-ux-product-design',
+    category: 'Design & Media',
+    short_desc: 'User research, wireframes, clickable prototypes, and design systems crafted in Figma.',
+    description: 'We turn conceptual ideas into beautifully crafted, intuitive digital interfaces. From comprehensive user journey mapping and wireframing to high-fidelity clickable interactive prototypes ready for development.',
+    starting_price: 120000,
+    delivery_time: '1–3 Weeks',
+    popular: true,
+    features: [
+      'Interactive Figma click-through prototypes',
+      'Scalable Design System (Typography, Colors, Components)',
+      'Responsive mobile & web viewport specifications',
+      'Developer-friendly redlines & asset export'
+    ],
+    deliverables: [
+      'Complete editable Figma project file',
+      'Clickable user-testing prototype link',
+      'Component library & style guide'
+    ]
+  },
+  {
+    id: 'srv_brand_identity',
+    title: 'Brand Identity & Graphic Design',
+    slug: 'brand-identity-graphic-design',
+    category: 'Design & Media',
+    short_desc: 'Distinctive logos, comprehensive brand identity guides, stationery, and social media creative kits.',
+    description: 'Elevate your brand presence with an authentic visual identity that commands trust. We craft memorable logos, color palettes, pitch deck presentations, and social media marketing kits.',
+    starting_price: 80000,
+    delivery_time: '5–7 Days',
+    features: [
+      'Logo design with multiple creative concepts',
+      'Color system, typography & usage guidelines',
+      'Business cards, letterheads & stationery mockups',
+      'Social media banner and post templates'
+    ],
+    deliverables: [
+      'Vector logo files (SVG, EPS, PNG, PDF)',
+      'Official Brand Guidelines manual',
+      'Editable Canva/Photoshop social templates'
+    ]
+  },
+  {
+    id: 'srv_cloud_devops',
+    title: 'Cloud Deployment, Database & System Support',
+    slug: 'cloud-deployment-system-support',
+    category: 'Cloud & Systems',
+    short_desc: 'Serverless architecture, Supabase PostgreSQL configuration, hosting migrations, and ongoing maintenance.',
+    description: 'Ensure your digital infrastructure is reliable, secure, and ready to scale. We handle cloud deployments on Vercel and AWS, database migrations, SSL certificates, performance audits, and monthly maintenance retainers.',
+    starting_price: 100000,
+    delivery_time: '3–5 Days',
+    features: [
+      'Cloud Deployment & Domain DNS Configuration',
+      'Supabase / PostgreSQL Setup & RLS Security Audit',
+      'Automated Database Backups & Health Checks',
+      'Bug troubleshooting & performance optimization'
+    ],
+    deliverables: [
+      'Live configured cloud deployment',
+      'Database configuration & backup scripts',
+      'Technical architecture handover document'
+    ]
+  },
+  {
+    id: 'srv_corporate_training',
+    title: 'Tailored Corporate Technology Training',
+    slug: 'corporate-technology-training',
+    category: 'Corporate Training',
+    short_desc: 'Custom upskilling cohorts for schools, businesses, and government agencies in software, cyber security, and data.',
+    description: 'Empower your workforce with tailored practical technology curricula. Whether upskilling your IT staff in cybersecurity defense or training team members on modern software tools and data analytics, we deliver measurable institutional impact.',
+    starting_price: 250000,
+    delivery_time: 'Flexible Schedules (Onsite / Online)',
+    popular: true,
+    features: [
+      'Customized curriculum tailored to company objectives',
+      'Practical lab assessments & capstone project reviews',
+      'Attendance and progress executive dashboard reports',
+      'Verified corporate certificates of completion'
+    ],
+    deliverables: [
+      'Structured learning modules & recorded sessions',
+      'Hands-on employee lab workbooks',
+      'Final cohort assessment report'
+    ]
+  }
+];
+
+// ============================================================
+// SERVICE REQUESTS / LEADS
+// ============================================================
+
+export const INITIAL_SERVICE_REQUESTS: ServiceRequest[] = [
+  {
+    id: 'req_1',
+    client_id: 'usr_client_1',
+    client_name: 'Boma Lawson',
+    client_email: 'client@apexholding.ng',
+    client_phone: '08023456789',
+    company_name: 'Apex Holdings Ltd',
+    service_id: 'srv_web_apps',
+    service_title: 'Custom Web Applications & Portals',
+    budget_range: '₦500,000 - ₦1,000,000',
+    timeline: '4–6 Weeks',
+    project_brief: 'We need an internal inventory management portal and supplier tracking dashboard with role-based access for our warehouse staff and finance leads.',
+    status: 'in_progress',
+    created_at: '2026-11-18T10:15:00Z'
+  },
+  {
+    id: 'req_2',
+    client_name: 'Chioma Okeke',
+    client_email: 'chioma@novabrand.ng',
+    client_phone: '08123456789',
+    company_name: 'Nova Retail Ventures',
+    service_id: 'srv_web_landing',
+    service_title: 'Business Websites & Modern Landing Pages',
+    budget_range: '₦150,000 - ₦300,000',
+    timeline: '2 Weeks',
+    project_brief: 'Looking for a high-converting e-commerce showcase website for our fashion accessories brand with Paystack checkout and WhatsApp ordering.',
+    status: 'proposal_sent',
+    created_at: '2026-11-20T14:30:00Z'
+  },
+  {
+    id: 'req_3',
+    client_name: 'Tunde Bakare',
+    client_email: 'tunde@greenroots.org',
+    client_phone: '09087654321',
+    company_name: 'GreenRoots NGO',
+    service_id: 'srv_corporate_training',
+    service_title: 'Tailored Corporate Technology Training',
+    budget_range: '₦300,000 - ₦600,000',
+    timeline: '3 Weeks (Weekend Cohort)',
+    project_brief: 'Requesting a 3-week staff training cohort for 15 field coordinators in Data Analysis, Google Workspace automation, and digital reporting.',
+    status: 'new',
+    created_at: '2026-11-22T09:00:00Z'
+  }
+];
+
+// ============================================================
+// CLIENT PROJECTS
+// ============================================================
+
+export const INITIAL_CLIENT_PROJECTS: ClientProject[] = [
+  {
+    id: 'proj_apex_portal',
+    client_id: 'usr_client_1',
+    client_name: 'Boma Lawson',
+    client_email: 'client@apexholding.ng',
+    title: 'Apex Enterprise Inventory & Logistics Portal',
+    service_type: 'Custom Web Applications & Portals',
+    budget: 750000,
+    paid_amount: 375000,
+    status: 'in_progress',
+    start_date: '2026-11-19T00:00:00Z',
+    delivery_date: '2026-12-28T00:00:00Z',
+    lead_assigned: 'Engr. Marshall',
+    progress_percentage: 45,
+    milestones: [
+      {
+        id: 'm_1',
+        title: 'Requirement Discovery & Database Architecture',
+        due_date: '2026-11-25T00:00:00Z',
+        status: 'completed',
+        deliverable_note: 'PostgreSQL relational schema and authentication flow approved.'
+      },
+      {
+        id: 'm_2',
+        title: 'Warehouse Inventory UI & Stock Management',
+        due_date: '2026-12-08T00:00:00Z',
+        status: 'in_progress',
+        deliverable_note: 'Dashboard frontend built and connected to Supabase real-time updates.'
+      },
+      {
+        id: 'm_3',
+        title: 'Supplier Invoicing & Paystack Integration',
+        due_date: '2026-12-18T00:00:00Z',
+        status: 'pending'
+      },
+      {
+        id: 'm_4',
+        title: 'User Acceptance Testing & Production Handover',
+        due_date: '2026-12-28T00:00:00Z',
+        status: 'pending'
+      }
+    ],
+    files: [
+      {
+        id: 'f_1',
+        name: 'Apex_Portal_Architecture_Spec.pdf',
+        url: '#',
+        uploaded_at: '2026-11-20T11:00:00Z',
+        size: '2.4 MB'
+      },
+      {
+        id: 'f_2',
+        name: 'Database_Schema_v1.png',
+        url: '#',
+        uploaded_at: '2026-11-22T16:45:00Z',
+        size: '1.1 MB'
+      }
+    ]
+  }
+];
+
+// ============================================================
+// CLIENT INVOICES
+// ============================================================
+
+export const INITIAL_CLIENT_INVOICES: ClientInvoice[] = [
+  {
+    id: 'inv_101',
+    invoice_number: 'INV-2026-0041',
+    project_id: 'proj_apex_portal',
+    project_title: 'Apex Enterprise Inventory & Logistics Portal',
+    client_id: 'usr_client_1',
+    client_name: 'Boma Lawson (Apex Holdings)',
+    amount: 375000,
+    due_date: '2026-11-19T00:00:00Z',
+    status: 'paid',
+    reference: 'MTS_INV_9812401',
+    paid_at: '2026-11-19T14:22:00Z'
+  },
+  {
+    id: 'inv_102',
+    invoice_number: 'INV-2026-0042',
+    project_id: 'proj_apex_portal',
+    project_title: 'Apex Enterprise Inventory & Logistics Portal (50% Balance)',
+    client_id: 'usr_client_1',
+    client_name: 'Boma Lawson (Apex Holdings)',
+    amount: 375000,
+    due_date: '2026-12-28T00:00:00Z',
+    status: 'unpaid'
+  }
+];
+
+// ============================================================
+// INSTRUCTOR RECRUITMENT APPLICATIONS
+// ============================================================
+
+export const INITIAL_INSTRUCTOR_APPLICATIONS: InstructorApplication[] = [
+  {
+    id: 'app_1',
+    full_name: 'Emeka Nwosu',
+    email: 'emeka.nwosu@example.com',
+    phone: '08034567812',
+    specialization: 'Cybersecurity & Ethical Hacking',
+    portfolio_url: 'https://github.com/emekanwosu-sec',
+    github_url: 'https://github.com/emekanwosu-sec',
+    experience_summary: '5 years experience working as a Security Analyst in FinTech. CEH certified. Experienced conducting lab simulations and teaching network defense.',
+    availability: 'hybrid',
+    status: 'under_review',
+    created_at: '2026-11-21T11:20:00Z'
+  },
+  {
+    id: 'app_2',
+    full_name: 'Amina Bello',
+    email: 'amina.bello@example.com',
+    phone: '07065432198',
+    specialization: 'UI/UX & Product Design',
+    portfolio_url: 'https://behance.net/aminabello',
+    experience_summary: 'Product Designer with 4 years experience designing mobile apps and SaaS systems in Figma. Passionate about teaching practical UX research.',
+    availability: 'online',
+    status: 'interview_scheduled',
+    created_at: '2026-11-22T15:40:00Z'
+  }
+];
+

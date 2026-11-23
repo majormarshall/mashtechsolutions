@@ -18,7 +18,10 @@ import {
   ShieldCheck,
   Lock,
   ArrowRight,
-  Loader2
+  Loader2,
+  FolderKanban,
+  FileText,
+  UserCheck
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -28,6 +31,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const menuItems = [
     { name: 'Admin Overview', href: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Service Requests', href: '/admin/service-requests', icon: FileText },
+    { name: 'Client Projects', href: '/admin/projects', icon: FolderKanban },
+    { name: 'Faculty Applications', href: '/admin/instructors', icon: UserCheck },
     { name: 'User Management', href: '/admin/users', icon: Users },
     { name: 'Courses & Pricing', href: '/admin/courses', icon: BookOpen },
     { name: 'Enrollments', href: '/admin/enrollments', icon: ShieldAlert },

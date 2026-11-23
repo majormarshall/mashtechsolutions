@@ -13,7 +13,13 @@ import {
   PaymentRecord, 
   Material,
   Profile,
-  UserRole
+  UserRole,
+  ServiceOffering,
+  ServiceRequest,
+  ClientProject,
+  ProjectMilestone,
+  ClientInvoice,
+  InstructorApplication
 } from '@/types';
 import { 
   INITIAL_COURSES, 
@@ -26,7 +32,12 @@ import {
   INITIAL_NOTIFICATIONS, 
   INITIAL_PAYMENTS, 
   INITIAL_MATERIALS,
-  INITIAL_PROFILES
+  INITIAL_PROFILES,
+  INITIAL_SERVICES,
+  INITIAL_SERVICE_REQUESTS,
+  INITIAL_CLIENT_PROJECTS,
+  INITIAL_CLIENT_INVOICES,
+  INITIAL_INSTRUCTOR_APPLICATIONS
 } from '@/lib/data/mockData';
 
 export interface UserAccount extends Profile {
@@ -51,6 +62,11 @@ interface DataContextType {
   notifications: Notification[];
   payments: PaymentRecord[];
   materials: Material[];
+  services: ServiceOffering[];
+  serviceRequests: ServiceRequest[];
+  clientProjects: ClientProject[];
+  clientInvoices: ClientInvoice[];
+  instructorApplications: InstructorApplication[];
   
   // Actions
   enrollInCourse: (courseId: string) => void;
@@ -66,6 +82,15 @@ interface DataContextType {
   issueCertificate: (studentId: string, courseId: string) => Certificate;
   verifyCertificate: (certCodeOrNum: string) => Certificate | undefined;
   markNotificationAsRead: (notificationId: string) => void;
+  
+  // Services & Client Actions
+  submitServiceRequest: (data: Omit<ServiceRequest, 'id' | 'created_at' | 'status'>) => ServiceRequest;
+  updateServiceRequestStatus: (requestId: string, status: ServiceRequest['status']) => void;
+  createClientProject: (data: Omit<ClientProject, 'id'>) => ClientProject;
+  updateProjectMilestone: (projectId: string, milestoneId: string, statusOrUpdates: ProjectMilestone['status'] | Partial<ProjectMilestone>) => void;
+  payInvoice: (invoiceId: string) => void;
+  submitInstructorApplication: (data: Omit<InstructorApplication, 'id' | 'created_at' | 'status'>) => InstructorApplication;
+  updateInstructorApplicationStatus: (appId: string, status: InstructorApplication['status']) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -109,6 +134,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       headline: 'Aspiring Full Stack Engineer',
       phone: '+2347058124966',
       password: 'password123'
+    },
+    {
+      id: 'usr_client_1',
+      email: 'client@apexholding.ng',
+      full_name: 'Boma Lawson',
+      role: 'client',
+      avatar_url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400',
+      headline: 'Operations Director, Apex Holdings Ltd',
+      phone: '+2348023456789',
+      password: 'password123'
     }
   ]);
 
@@ -122,6 +157,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
   const [payments, setPayments] = useState<PaymentRecord[]>(INITIAL_PAYMENTS);
   const [materials, setMaterials] = useState<Material[]>(INITIAL_MATERIALS);
+  
+  // Expanded Digital Services & Operations State
+  const [services, setServices] = useState<ServiceOffering[]>(INITIAL_SERVICES);
+  const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>(INITIAL_SERVICE_REQUESTS);
+  const [clientProjects, setClientProjects] = useState<ClientProject[]>(INITIAL_CLIENT_PROJECTS);
+  const [clientInvoices, setClientInvoices] = useState<ClientInvoice[]>(INITIAL_CLIENT_INVOICES);
+  const [instructorApplications, setInstructorApplications] = useState<InstructorApplication[]>(INITIAL_INSTRUCTOR_APPLICATIONS);
 
   // Restore session from localStorage if present
   useEffect(() => {
@@ -464,6 +506,120 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
   };
 
+  // -----------------------------------------------------------
+  // Digital Services & Client Project Actions
+  // -----------------------------------------------------------
+  const submitServiceRequest = (data: Omit<ServiceRequest, 'id' | 'created_at' | 'status'>): ServiceRequest => {
+    const newReq: ServiceRequest = {
+      ...data,
+      id: `req_${Date.now()}`,
+      status: 'new',
+      created_at: new Date().toISOString()
+    };
+    setServiceRequests(prev => [newReq, ...prev]);
+
+    // Send notification to admin
+    const notif: Notification = {
+      id: `notif_${Date.now()}`,
+      user_id: 'usr_admin',
+      title: 'New Service Quotation Request!',
+      message: `${data.client_name} requested a quote for ${data.service_title}.`,
+      link: '/admin/service-requests',
+      type: 'info',
+      is_read: false,
+      created_at: new Date().toISOString()
+    };
+    setNotifications(prev => [notif, ...prev]);
+
+    return newReq;
+  };
+
+  const updateServiceRequestStatus = (requestId: string, status: ServiceRequest['status']) => {
+    setServiceRequests(prev => prev.map(r => r.id === requestId ? { ...r, status } : r));
+  };
+
+  const createClientProject = (data: Omit<ClientProject, 'id'>): ClientProject => {
+    const newProj: ClientProject = {
+      ...data,
+      id: `proj_${Date.now()}`
+    };
+    setClientProjects(prev => [newProj, ...prev]);
+    return newProj;
+  };
+
+  const updateProjectMilestone = (projectId: string, milestoneId: string, statusOrUpdates: ProjectMilestone['status'] | Partial<ProjectMilestone>) => {
+    setClientProjects(prev => prev.map(p => {
+      if (p.id !== projectId) return p;
+      const updatedMilestones = p.milestones.map(m => {
+        if (m.id !== milestoneId) return m;
+        if (typeof statusOrUpdates === 'string') {
+          return { ...m, status: statusOrUpdates };
+        }
+        return { ...m, ...statusOrUpdates };
+      });
+      const completedCount = updatedMilestones.filter(m => m.status === 'completed').length;
+      const progress = Math.round((completedCount / updatedMilestones.length) * 100);
+      return {
+        ...p,
+        milestones: updatedMilestones,
+        progress_percentage: progress,
+        status: progress === 100 ? 'completed' : progress > 0 ? 'in_progress' : p.status
+      };
+    }));
+  };
+
+  const payInvoice = (invoiceId: string) => {
+    setClientInvoices(prev => prev.map(inv => {
+      if (inv.id !== invoiceId) return inv;
+      return {
+        ...inv,
+        status: 'paid',
+        reference: `MTS_INV_PAY_${Math.floor(10000000 + Math.random() * 90000000)}`,
+        paid_at: new Date().toISOString()
+      };
+    }));
+
+    // Update corresponding project paid_amount
+    const invoice = clientInvoices.find(i => i.id === invoiceId);
+    if (invoice) {
+      setClientProjects(prev => prev.map(p => {
+        if (p.id === invoice.project_id) {
+          return { ...p, paid_amount: (p.paid_amount || 0) + invoice.amount };
+        }
+        return p;
+      }));
+    }
+  };
+
+  const submitInstructorApplication = (data: Omit<InstructorApplication, 'id' | 'created_at' | 'status'>): InstructorApplication => {
+    const newApp: InstructorApplication = {
+      ...data,
+      id: `app_${Date.now()}`,
+      status: 'received',
+      created_at: new Date().toISOString()
+    };
+    setInstructorApplications(prev => [newApp, ...prev]);
+
+    // Admin notification
+    const notif: Notification = {
+      id: `notif_${Date.now()}`,
+      user_id: 'usr_admin',
+      title: 'New Faculty Application Received!',
+      message: `${data.full_name} applied for instructor role in ${data.specialization}.`,
+      link: '/admin/instructors',
+      type: 'info',
+      is_read: false,
+      created_at: new Date().toISOString()
+    };
+    setNotifications(prev => [notif, ...prev]);
+
+    return newApp;
+  };
+
+  const updateInstructorApplicationStatus = (appId: string, status: InstructorApplication['status']) => {
+    setInstructorApplications(prev => prev.map(a => a.id === appId ? { ...a, status } : a));
+  };
+
   return (
     <DataContext.Provider value={{
       currentUser,
@@ -483,6 +639,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       notifications,
       payments,
       materials,
+      services,
+      serviceRequests,
+      clientProjects,
+      clientInvoices,
+      instructorApplications,
       enrollInCourse,
       completeLesson,
       submitAssignment,
@@ -495,7 +656,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       deleteCourse,
       issueCertificate,
       verifyCertificate,
-      markNotificationAsRead
+      markNotificationAsRead,
+      submitServiceRequest,
+      updateServiceRequestStatus,
+      createClientProject,
+      updateProjectMilestone,
+      payInvoice,
+      submitInstructorApplication,
+      updateInstructorApplicationStatus
     }}>
       {children}
     </DataContext.Provider>

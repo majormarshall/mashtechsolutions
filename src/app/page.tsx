@@ -21,7 +21,10 @@ import {
   Terminal,
   Layers,
   Palette,
-  Cloud
+  Cloud,
+  Building2,
+  Code2,
+  Laptop
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -77,16 +80,25 @@ export default function HomePage() {
                   href="/courses"
                   className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 via-cyan-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:brightness-110 transition-all flex items-center justify-center gap-2"
                 >
+                  <GraduationCap className="w-4 h-4" />
                   <span>Explore Courses</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
 
                 <Link
+                  href="/services"
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 hover:text-white hover:bg-cyan-900/60 transition-all flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <Code2 className="w-4 h-4 text-cyan-400" />
+                  <span>Commission a Project</span>
+                </Link>
+
+                <Link
                   href="/contact"
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm bg-slate-900 border border-slate-700 text-slate-200 hover:text-white hover:border-cyan-400 transition-all flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-sm bg-slate-900 border border-slate-700 text-slate-300 hover:text-white hover:border-cyan-400 transition-all flex items-center justify-center gap-2"
                 >
                   <Phone className="w-4 h-4 text-cyan-400" />
-                  <span>Talk with an Advisor</span>
+                  <span>Talk with Us</span>
                 </Link>
               </div>
 
@@ -352,6 +364,140 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* DUAL-ENGINE: DIGITAL SERVICES STUDIO & CORPORATE EXPANSION */}
+      <section className="py-20 bg-gradient-to-b from-[#020716] via-[#061230] to-[#020716] border-y border-cyan-500/20 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-cyan-950/80 border border-cyan-500/30 text-cyan-300">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Technology Training & Services Startup</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+              We Don&apos;t Just Teach Tech.{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500">
+                We Build & Deploy It.
+              </span>
+            </h2>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+              MashTech Solutions operates as a dual-engine technology powerhouse: an accredited modern academy cultivating top-tier developers, and a high-performance digital services studio engineering software for businesses across Nigeria and beyond.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            {/* Engine 1: Digital Studio */}
+            <div className="p-8 rounded-3xl bg-[#071330]/90 border border-cyan-500/30 hover:border-cyan-400 transition-all flex flex-col justify-between space-y-6 shadow-xl relative group">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
+                  <Code2 className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Digital Services Studio</h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Bespoke web applications, high-converting corporate sites, cross-platform mobile apps (React Native), brand identity systems, and cloud infrastructure on AWS/Vercel/Supabase.
+                </p>
+                <ul className="space-y-2 text-xs text-slate-400">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span>Web & SaaS Engineering</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span>UI/UX & Brand Systems</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span>Cloud Architecture & DevOps</span>
+                  </li>
+                </ul>
+              </div>
+              <Link
+                href="/services"
+                className="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs text-center transition-all flex items-center justify-center gap-2"
+              >
+                <span>Explore Studio Catalog</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {/* Engine 2: Corporate Training */}
+            <div className="p-8 rounded-3xl bg-[#071330]/90 border border-blue-500/30 hover:border-blue-400 transition-all flex flex-col justify-between space-y-6 shadow-xl relative group">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-300">
+                  <Building2 className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Corporate & School Upskilling</h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Tailored corporate technology training for corporate enterprises, educational institutions, government agencies, and SMEs. Upskill your workforce in cybersecurity, cloud, and programming.
+                </p>
+                <ul className="space-y-2 text-xs text-slate-400">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <span>Executive Cybersecurity Drills</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <span>Modern Full-Stack Bootcamps</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <span>Customized Hybrid Curriculums</span>
+                  </li>
+                </ul>
+              </div>
+              <Link
+                href="/corporate-training"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold text-xs text-center hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+              >
+                <span>Request Corporate Proposal</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {/* Engine 3: Faculty Recruitment Campaign */}
+            <div className="p-8 rounded-3xl bg-[#071330]/90 border border-purple-500/30 hover:border-purple-400 transition-all flex flex-col justify-between space-y-6 shadow-xl relative group">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    WE ARE HIRING
+                  </span>
+                </div>
+                <h3 className="text-xl font-bold text-white">Faculty & Instructors</h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Instructors wanted across all technology disciplines: Web Development, Mobile Apps, Cloud Engineering, Cyber Security, UI/UX, Data Science, and Graphic Design.
+                </p>
+                <ul className="space-y-2 text-xs text-slate-400">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <span>Competitive Compensation</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <span>Flexible Remote / Hybrid Sessions</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <span>Shape Africa&apos;s Tech Leaders</span>
+                  </li>
+                </ul>
+              </div>
+              <Link
+                href="/careers"
+                className="w-full py-3 rounded-xl bg-slate-900 border border-purple-500/40 text-purple-300 hover:text-white hover:bg-purple-950/60 font-bold text-xs text-center transition-all flex items-center justify-center gap-2"
+              >
+                <span>Apply as an Instructor</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
           </div>
 
         </div>

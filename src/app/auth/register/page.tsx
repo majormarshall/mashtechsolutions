@@ -39,6 +39,8 @@ export default function RegisterPage() {
     if (result.success) {
       if (formData.role === 'instructor') {
         router.push('/instructor/dashboard');
+      } else if (formData.role === 'client') {
+        router.push('/client/dashboard');
       } else {
         router.push('/student/dashboard');
       }
@@ -104,11 +106,11 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">Account Role</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, role: 'student' })}
-                  className={`py-2 px-3 rounded-xl text-xs font-bold border transition-colors ${
+                  className={`py-2 px-2 rounded-xl text-[11px] font-bold border transition-colors ${
                     formData.role === 'student'
                       ? 'bg-cyan-600 text-white border-cyan-400'
                       : 'bg-slate-900 text-slate-300 border-slate-800'
@@ -119,13 +121,24 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, role: 'instructor' })}
-                  className={`py-2 px-3 rounded-xl text-xs font-bold border transition-colors ${
+                  className={`py-2 px-2 rounded-xl text-[11px] font-bold border transition-colors ${
                     formData.role === 'instructor'
                       ? 'bg-cyan-600 text-white border-cyan-400'
                       : 'bg-slate-900 text-slate-300 border-slate-800'
                   }`}
                 >
                   👨‍🏫 Instructor
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, role: 'client' })}
+                  className={`py-2 px-2 rounded-xl text-[11px] font-bold border transition-colors ${
+                    formData.role === 'client'
+                      ? 'bg-cyan-600 text-white border-cyan-400'
+                      : 'bg-slate-900 text-slate-300 border-slate-800'
+                  }`}
+                >
+                  💼 Client
                 </button>
               </div>
             </div>
@@ -165,7 +178,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full py-3 rounded-xl font-bold text-xs bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2"
             >
-              <span>{loading ? 'Registering...' : `Register as ${formData.role === 'instructor' ? 'Instructor' : 'Student'}`}</span>
+              <span>{loading ? 'Registering...' : `Register as ${formData.role === 'instructor' ? 'Instructor' : formData.role === 'client' ? 'Client' : 'Student'}`}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
